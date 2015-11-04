@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PathTracker</string>
+    <string name="title_activity_map">Map</string>
+
+    <!--fragment_control -->
+    <string name="button_start_service">Start</string>
+    <string name="button_stop_service">Stop</string>
+
+</resources>
