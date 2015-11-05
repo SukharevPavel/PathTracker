@@ -4,7 +4,7 @@
 
     <!-- TODO: Update blank fragment layout -->
     <Button
-        android:id="@+id/control_service_button"
+        android:id="@+id/button_control_service"
         android:text="@string/button_start_service"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

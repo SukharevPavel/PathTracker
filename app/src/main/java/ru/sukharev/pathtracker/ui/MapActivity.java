@@ -1,5 +1,6 @@
 package ru.sukharev.pathtracker.ui;
 
+import android.graphics.PointF;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -8,9 +9,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import ru.sukharev.pathtracker.R;
+import java.util.List;
 
-public class MapActivity extends FragmentActivity {
+import ru.sukharev.pathtracker.R;
+import ru.sukharev.pathtracker.utils.MapHelper;
+
+public class MapActivity extends FragmentActivity implements MapHelper.MapHelperCallbacks{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -65,4 +69,23 @@ public class MapActivity extends FragmentActivity {
     }
 
 
+    @Override
+    public void onNewPoint(PointF last, PointF newPoint) {
+
+    }
+
+    @Override
+    public void onNewPointList(List<PointF> list) {
+
+    }
+
+    @Override
+    public void onStartPoint(PointF startPoint) {
+
+    }
+
+    @Override
+    public void onEndPoint(PointF endPoint) {
+
+    }
 }

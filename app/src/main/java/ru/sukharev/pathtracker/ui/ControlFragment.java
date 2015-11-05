@@ -15,6 +15,7 @@ import ru.sukharev.pathtracker.utils.MapHelper;
  */
 public class ControlFragment extends Fragment {
 
+    private MapHelper mHelper;
 
     private final View.OnClickListener mButtonListener = new View.OnClickListener() {
         @Override
@@ -25,23 +26,25 @@ public class ControlFragment extends Fragment {
 
     public ControlFragment() {
         // Required empty public constructor
-        new MapHelper(getContext());
     }
 
 
     @Override
     public void onCreate(Bundle savedInstancceState){
         super.onCreate(savedInstancceState);
+        mHelper = new MapHelper(getActivity().getApplicationContext());
         setRetainInstance(true);
-        //T0D0 init helper
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_control, container, false);
+        View view = inflater.inflate(R.layout.fragment_control, container, false);
+        mHelper.setCallbacks((MapHelper.MapHelperCallbacks) getActivity());
+        view.findViewById(R.id.button_control_service).setOnClickListener(mButtonListener);
+        return view;
     }
+
 
 
 }
