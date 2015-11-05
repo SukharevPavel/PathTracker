@@ -1,5 +1,6 @@
 package ru.sukharev.pathtracker.ui;
 
+import android.content.ContentValues;
 import android.graphics.PointF;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -14,15 +15,19 @@ import java.util.List;
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
 
-public class MapActivity extends FragmentActivity implements MapHelper.MapHelperCallbacks{
+public class MapActivity extends FragmentActivity implements MapHelper.MapHelperListener{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+
+    private ControlFragment mControlFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-
+        setUpMapIfNeeded();
+        mControlFragment = (ControlFragment) getSupportFragmentManager().
+                findFragmentById(R.id.control_fragment);
     }
 
     @Override
@@ -49,7 +54,7 @@ public class MapActivity extends FragmentActivity implements MapHelper.MapHelper
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment))
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
@@ -68,6 +73,16 @@ public class MapActivity extends FragmentActivity implements MapHelper.MapHelper
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
+
+    @Override
+    public void onServiceStart() {
+        mControlFragment.changeButtonText(getString(R.string.button_stop_service));
+    }
+
+    @Override
+    public void onServiceStop() {
+        mControlFragment.changeButtonText(getString(R.string.button_start_service));
+    }
 
     @Override
     public void onNewPoint(PointF last, PointF newPoint) {

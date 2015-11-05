@@ -12,10 +12,10 @@ import ru.sukharev.pathtracker.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class NavigationDrawerFragment extends Fragment {
+public class NavigationDrawerListFragment extends Fragment {
 
 
-    public NavigationDrawerFragment() {
+    public NavigationDrawerListFragment() {
         // Required empty public constructor
     }
 

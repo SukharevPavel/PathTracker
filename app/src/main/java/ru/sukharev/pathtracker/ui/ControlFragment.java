@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
@@ -16,11 +17,13 @@ import ru.sukharev.pathtracker.utils.MapHelper;
 public class ControlFragment extends Fragment {
 
     private MapHelper mHelper;
+    private Button mControlButton;
 
     private final View.OnClickListener mButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
+            if (mHelper.isServiceStarted()) mHelper.stopService();
+            else mHelper.startService();
         }
     };
 
@@ -40,9 +43,14 @@ public class ControlFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_control, container, false);
-        mHelper.setCallbacks((MapHelper.MapHelperCallbacks) getActivity());
-        view.findViewById(R.id.button_control_service).setOnClickListener(mButtonListener);
+        mHelper.setListeners((MapHelper.MapHelperListener) getActivity());
+        mControlButton = (Button) view.findViewById(R.id.button_control_service);
+        mControlButton.setOnClickListener(mButtonListener);
         return view;
+    }
+
+    public void changeButtonText(String text){
+        if (mControlButton!= null) mControlButton.setText(text);
     }
 
 

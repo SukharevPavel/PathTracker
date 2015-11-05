@@ -10,6 +10,8 @@ public class TrackingService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
+    private TrackingListener mListener;
+
 
     private TrackingService() {
     }
@@ -20,8 +22,8 @@ public class TrackingService extends Service {
         // TODO: Return the communication channel to the service.
     }
 
-    public void setCallback(TrackingCallback callback){
-
+    public void setListener(TrackingListener listener){
+        mListener = listener;
     }
 
 
@@ -33,7 +35,7 @@ public class TrackingService extends Service {
 
     }
 
-    public interface TrackingCallback{
+    public interface TrackingListener{
 
         void onNewPoint(PointF point);
 
