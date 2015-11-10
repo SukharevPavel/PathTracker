@@ -3,6 +3,7 @@ package ru.sukharev.pathtracker.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +19,12 @@ public class ControlFragment extends Fragment {
 
     private MapHelper mHelper;
     private Button mControlButton;
+    private final static String TAG = "ControlFragment.java";
 
     private final View.OnClickListener mButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.i(TAG, "onClick " + mHelper.isServiceStarted());
             if (mHelper.isServiceStarted()) mHelper.stopService();
             else mHelper.startService();
         }

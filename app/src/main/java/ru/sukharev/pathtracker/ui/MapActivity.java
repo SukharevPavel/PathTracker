@@ -11,6 +11,8 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -86,9 +88,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         if (mMap == null) {
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment))
                     .getMap();
-            if (mMap != null) {
-                setUpMap();
-            }
         }
     }
 
@@ -119,6 +118,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             mMap.addPolyline(new PolylineOptions().geodesic(true)
                     .add(new LatLng(last.getLatitude(), last.getLongitude()))
                     .add(new LatLng(newPoint.getLatitude(), newPoint.getLongitude())));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(newPoint.getLatitude(), newPoint.getLongitude()), 10));
     }
 
     @Override
@@ -128,9 +128,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onStartPoint(Location startPoint) {
+        setUpMapIfNeeded();
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()))
                 .title("Start"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()),10));
     }
 
     @Override

@@ -5,13 +5,14 @@
 
     <fragment  android:layout_width="match_parent"
     android:layout_height="match_parent" android:id="@+id/map_fragment" tools:context=".MapActivity"
-    android:name="com.google.android.gms.maps.SupportMapFragment" />
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_above="@+id/control_fragment"/>
 
     <fragment  android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:id="@+id/control_fragment" tools:context=".MapActivity"
+        android:layout_height="wrap_content" android:id="@id/control_fragment" tools:context=".MapActivity"
         android:name="ru.sukharev.pathtracker.ui.ControlFragment"
         android:layout_alignParentBottom="true"/>
-
+<!--
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
@@ -25,4 +26,5 @@
             tools:layout="@layout/fragment_navigation_drawer" />
 
     </android.support.v4.widget.DrawerLayout>
+    -->
 </RelativeLayout>

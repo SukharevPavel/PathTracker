@@ -10,18 +10,22 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 public class TrackingService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
+    private static final String TAG = "TrackingService.java";
 
     private TrackingListener mListener;
     LocationManager mLocationManager;
     LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
+            Log.i(TAG,"tracked");
             if (mListener!=null)
                 mListener.onNewPoint(location);
         }
@@ -48,6 +52,7 @@ public class TrackingService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.i(TAG, "onBind");
         setUpTracking();
         return new LocalBinder();
     }
@@ -55,14 +60,18 @@ public class TrackingService extends Service {
     private void setUpTracking() {
         mLocationManager = (LocationManager) getApplicationContext().
                 getSystemService(Context.LOCATION_SERVICE);
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
+        } else mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
     }
 
     private void abandonTracking(){
         if (mLocationManager != null)
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                mLocationManager.removeUpdates(mLocationListener);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                    mLocationManager.removeUpdates(mLocationListener);
+            } else mLocationManager.removeUpdates(mLocationListener);
     }
 
     public void setListener(TrackingListener listener){
@@ -72,6 +81,7 @@ public class TrackingService extends Service {
 
     @Override
     public boolean onUnbind(Intent itent){
+        Log.i(TAG,"unbind");
         abandonTracking();
         return false;
     }

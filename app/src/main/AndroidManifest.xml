@@ -39,7 +39,6 @@
 
         <service
             android:name=".service.TrackingService"
-            android:enabled="false"
             android:exported="false" >
         </service>
     </application>
