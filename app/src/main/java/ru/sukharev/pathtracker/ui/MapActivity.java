@@ -1,25 +1,34 @@
 package ru.sukharev.pathtracker.ui;
 
-import android.content.ContentValues;
-import android.graphics.PointF;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.List;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
 
-public class MapActivity extends FragmentActivity implements MapHelper.MapHelperListener{
+public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private ControlFragment mControlFragment;
+
+    private static final int REQUEST_LOCATION_PERMISSION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +37,34 @@ public class MapActivity extends FragmentActivity implements MapHelper.MapHelper
         setUpMapIfNeeded();
         mControlFragment = (ControlFragment) getSupportFragmentManager().
                 findFragmentById(R.id.control_fragment);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            checkPermission();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    private void checkPermission(){
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                requestLocationPermission();
+    }
+
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_LOCATION_PERMISSION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                //T0D0 show error and close
+            }
+        }
     }
 
     /**
@@ -51,12 +83,9 @@ public class MapActivity extends FragmentActivity implements MapHelper.MapHelper
      * method in {@link #onResume()} to guarantee that it will be called.
      */
     private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment))
                     .getMap();
-            // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 setUpMap();
             }
@@ -85,22 +114,27 @@ public class MapActivity extends FragmentActivity implements MapHelper.MapHelper
     }
 
     @Override
-    public void onNewPoint(PointF last, PointF newPoint) {
+    public void onNewPoint(Location last, Location newPoint) {
+        setUpMapIfNeeded();
+            mMap.addPolyline(new PolylineOptions().geodesic(true)
+                    .add(new LatLng(last.getLatitude(), last.getLongitude()))
+                    .add(new LatLng(newPoint.getLatitude(), newPoint.getLongitude())));
+    }
+
+    @Override
+    public void onNewPointList(List<Location> list) {
 
     }
 
     @Override
-    public void onNewPointList(List<PointF> list) {
-
+    public void onStartPoint(Location startPoint) {
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()))
+                .title("Start"));
     }
 
     @Override
-    public void onStartPoint(PointF startPoint) {
-
-    }
-
-    @Override
-    public void onEndPoint(PointF endPoint) {
+    public void onEndPoint(Location endPoint) {
 
     }
 }

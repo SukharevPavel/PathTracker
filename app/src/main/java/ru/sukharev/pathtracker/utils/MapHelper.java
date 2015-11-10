@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.location.Location;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
@@ -23,7 +24,7 @@ import ru.sukharev.pathtracker.service.TrackingService;
 public class MapHelper implements TrackingService.TrackingListener {
 
     private Context mContext;
-    private List<PointF> mPoints;
+    private List<Location> mPoints;
     private boolean isServiceStarted = false;
     private TrackingService mService;
     private MapHelperListener mListener;
@@ -71,8 +72,12 @@ public class MapHelper implements TrackingService.TrackingListener {
     };
 
     @Override
-    public void onNewPoint(PointF point) {
-            mPoints.add(point);
+    public void onNewPoint(Location point) {
+            if (mListener != null) {
+                if (mPoints.isEmpty()) mListener.onStartPoint(point);
+                else mListener.onNewPoint(mPoints.get(mPoints.size()), point);
+            }
+        mPoints.add(point);
 
     }
 
@@ -82,13 +87,13 @@ public class MapHelper implements TrackingService.TrackingListener {
 
         void onServiceStop();
 
-        void onNewPoint(PointF last, PointF newPoint);
+        void onNewPoint(Location last, Location newPoint);
 
-        void onNewPointList(List<PointF> list);
+        void onNewPointList(List<Location> list);
 
-        void onStartPoint(PointF startPoint);
+        void onStartPoint(Location startPoint);
 
-        void onEndPoint(PointF endPoint);
+        void onEndPoint(Location endPoint);
 
     }
 
