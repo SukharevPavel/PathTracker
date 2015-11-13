@@ -58,7 +58,10 @@ public class MapHelper implements TrackingService.TrackingListener {
         return isServiceStarted;
     }
 
-
+    public void getList(){
+        if (mPoints!= null && !mPoints.isEmpty() && mListener!=null)
+            mListener.onNewPointList(mPoints);
+    }
 
     ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -84,8 +87,14 @@ public class MapHelper implements TrackingService.TrackingListener {
     @Override
     public void onNewPoint(Location point) {
             if (mListener != null) {
-                if (mPoints.isEmpty()) mListener.onStartPoint(point);
-                else mListener.onNewPoint(mPoints.get(mPoints.size()), point);
+                if (mPoints.isEmpty()) {
+                    Log.i(TAG,"startPoint");
+                    mListener.onStartPoint(point);
+                }
+                else {
+                    Log.i(TAG,"newPoint");
+                    mListener.onNewPoint(mPoints.get(mPoints.size()-1), point);
+                }
             }
         mPoints.add(point);
 

@@ -49,6 +49,8 @@ public class ControlFragment extends Fragment {
         mHelper.setListeners((MapHelper.MapHelperListener) getActivity());
         mControlButton = (Button) view.findViewById(R.id.button_control_service);
         mControlButton.setOnClickListener(mButtonListener);
+        if (mHelper.isServiceStarted()) changeButtonText(getString(R.string.button_stop_service));
+        mHelper.getList();
         return view;
     }
 

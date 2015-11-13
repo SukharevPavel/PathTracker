@@ -32,17 +32,17 @@ public class TrackingService extends Service {
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
-
+            Log.i(TAG,"onStatusChanged " + status);
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-
+            Log.i(TAG,"onproviderEnabled");
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-
+            Log.i(TAG,"onproviderDisabled");
         }
     };
 
@@ -53,17 +53,26 @@ public class TrackingService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.i(TAG, "onBind");
-        setUpTracking();
         return new LocalBinder();
     }
 
     private void setUpTracking() {
+        Log.i(TAG, "setTracking");
         mLocationManager = (LocationManager) getApplicationContext().
                 getSystemService(Context.LOCATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
-        } else mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
+                registerLocationListeners();
+        } else {
+            registerLocationListeners();
+        }
+    }
+
+    public void registerLocationListeners(){
+        Log.i(TAG, "registerListeners");
+        //T0D0 check if provider enabled
+      //  mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
     }
 
     private void abandonTracking(){
@@ -75,6 +84,7 @@ public class TrackingService extends Service {
     }
 
     public void setListener(TrackingListener listener){
+        Log.i(TAG, "setListener");
         mListener = listener;
         setUpTracking();
     }

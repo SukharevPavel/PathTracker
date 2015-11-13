@@ -10,6 +10,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -25,6 +27,8 @@ import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
 
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener{
+
+    private final static String TAG = "MapActivity.java";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -112,18 +116,28 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         mControlFragment.changeButtonText(getString(R.string.button_start_service));
     }
 
+
+    int i=0;
     @Override
     public void onNewPoint(Location last, Location newPoint) {
-        setUpMapIfNeeded();
+      //  setUpMapIfNeeded();
+        Log.i(TAG, "new point = " + last.getLatitude() + " " + last.getLongitude() );
+        Log.i(TAG, "new point = " + newPoint.getLatitude() + " " + newPoint.getLongitude() );
+        Toast.makeText(this,"new point = " + newPoint.getLatitude() + " " + newPoint.getLongitude(),Toast.LENGTH_LONG).show();
+        /*mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(newPoint.getLatitude(), newPoint.getLongitude()))
+                .title(String.valueOf(i++)));*/
             mMap.addPolyline(new PolylineOptions().geodesic(true)
                     .add(new LatLng(last.getLatitude(), last.getLongitude()))
                     .add(new LatLng(newPoint.getLatitude(), newPoint.getLongitude())));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(newPoint.getLatitude(), newPoint.getLongitude()), 10));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(newPoint.getLatitude(), newPoint.getLongitude()), 10));
     }
 
     @Override
     public void onNewPointList(List<Location> list) {
-
+        onStartPoint(list.get(0));
+        for (int i=1;i<list.size(); i++)
+            onNewPoint(list.get(i-1), list.get(i));
     }
 
     @Override
@@ -132,7 +146,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()))
                 .title("Start"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()),10));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()),10));
     }
 
     @Override
