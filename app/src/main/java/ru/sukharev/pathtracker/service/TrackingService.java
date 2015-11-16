@@ -71,8 +71,8 @@ public class TrackingService extends Service {
     public void registerLocationListeners(){
         Log.i(TAG, "registerListeners");
         //T0D0 check if provider enabled
-      //  mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
+      mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
+        //mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
     }
 
     private void abandonTracking(){
