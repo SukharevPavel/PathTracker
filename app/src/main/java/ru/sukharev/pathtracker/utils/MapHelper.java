@@ -32,7 +32,6 @@ public class MapHelper implements TrackingService.TrackingListener {
     private boolean isServiceStarted = false;
     private TrackingService mService;
     private MapHelperListener mListener;
-    private long startTime, endTime;
 
     ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -58,7 +57,6 @@ public class MapHelper implements TrackingService.TrackingListener {
     }
 
     private void initTracking(IBinder service){
-        startTime = System.currentTimeMillis();
         isServiceStarted = true;
         mService = ((TrackingService) ((TrackingService.LocalBinder) service).getService());
         mService.setListener(MapHelper.this);
@@ -66,7 +64,6 @@ public class MapHelper implements TrackingService.TrackingListener {
     }
 
     private void stopTracking(){
-        endTime = System.currentTimeMillis();
         isServiceStarted = false;
         mService = null;
         mListener.onServiceStop();
@@ -78,6 +75,7 @@ public class MapHelper implements TrackingService.TrackingListener {
 
     public void startService() {
         Log.i(TAG, "startService()");
+        clearData();
         Intent intent = new Intent(mContext, TrackingService.class);
         mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
@@ -85,6 +83,10 @@ public class MapHelper implements TrackingService.TrackingListener {
     public void stopService() {
         mContext.unbindService(connection);
         stopTracking();
+    }
+
+    public void clearData(){
+        mPoints.clear();
     }
 
     public boolean saveToDatabase(String name) throws SQLException {

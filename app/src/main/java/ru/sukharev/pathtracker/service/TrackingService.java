@@ -17,7 +17,6 @@ import android.util.Log;
 
 public class TrackingService extends Service {
 
-    private final IBinder mBinder = new LocalBinder();
     private static final String TAG = "TrackingService.java";
 
     private TrackingListener mListener;

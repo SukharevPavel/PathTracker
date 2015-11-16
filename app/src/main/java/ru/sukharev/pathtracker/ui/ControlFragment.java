@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import java.sql.SQLException;
+
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
 
@@ -57,6 +59,11 @@ public class ControlFragment extends Fragment {
     public void changeButtonText(String text){
         if (mControlButton!= null) mControlButton.setText(text);
     }
+
+    public boolean saveToDatabase(String name) throws SQLException {
+        return mHelper.saveToDatabase(name);
+    }
+
 
 
 

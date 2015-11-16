@@ -2,18 +2,22 @@ package ru.sukharev.pathtracker.ui;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -21,15 +25,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
-public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener{
+public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener,
+        PathNamingFragment.DialogPathNamingListener{
 
     private final static String TAG = "MapActivity.java";
+
+    private final static String PATH_NAMING_FRAGMENT_TAG = "path_naming_fragment";
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -115,6 +123,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     @Override
     public void onServiceStop() {
         mControlFragment.changeButtonText(getString(R.string.button_start_service));
+        PathNamingFragment fragment = new PathNamingFragment();
+        fragment.show(getSupportFragmentManager(), PATH_NAMING_FRAGMENT_TAG);
     }
 
 
@@ -154,4 +164,15 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onEndPoint(MapPoint endPoint) {
 
     }
+
+    @Override
+    public void onGetName(String name) {
+        try {
+            if (!mControlFragment.saveToDatabase(name)) Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_LONG).show();
+        } catch (SQLException e) {
+            Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
+
 }

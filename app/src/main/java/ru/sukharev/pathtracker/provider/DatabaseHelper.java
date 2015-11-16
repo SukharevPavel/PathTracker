@@ -28,7 +28,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private PathDAO mPathDAO;
     private PointDAO mPointDAO;
 
-    private DatabaseHelper(Context context) {
+    public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);
     }
 
