@@ -6,4 +6,6 @@
     <string name="button_start_service">Start</string>
     <string name="button_stop_service">Stop</string>
 
+    <string name="list_is_empty">Empty list</string>
+
 </resources>

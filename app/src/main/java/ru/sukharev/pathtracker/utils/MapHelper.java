@@ -9,11 +9,16 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
 import ru.sukharev.pathtracker.service.TrackingService;
+import ru.sukharev.pathtracker.utils.orm.MapPath;
+import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 /**
  * Presenter element which handle interaction between View {@link ru.sukharev.pathtracker.ui.MapActivity}
@@ -23,18 +28,17 @@ public class MapHelper implements TrackingService.TrackingListener {
 
     private static final String TAG = "MapHelper.java";
     private Context mContext;
-    private List<Location> mPoints;
+    private List<MapPoint> mPoints;
     private boolean isServiceStarted = false;
     private TrackingService mService;
     private MapHelperListener mListener;
+    private long startTime, endTime;
+
     ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.i(TAG, "service connected");
-            isServiceStarted = true;
-            mService = ((TrackingService) ((TrackingService.LocalBinder) service).getService());
-            mService.setListener(MapHelper.this);
-            mListener.onServiceStart();
+            initTracking(service);
         }
 
 
@@ -42,9 +46,7 @@ public class MapHelper implements TrackingService.TrackingListener {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.i(TAG, "service disconnected");
-            isServiceStarted = false;
-            mService = null;
-            mListener.onServiceStop();
+            stopTracking();
         }
     };
     private DatabaseHelper mDatabaseHelper;
@@ -53,6 +55,21 @@ public class MapHelper implements TrackingService.TrackingListener {
         mContext = ctx;
         mPoints = new LinkedList<>();
         mDatabaseHelper = DatabaseHelper.getInstance(ctx);
+    }
+
+    private void initTracking(IBinder service){
+        startTime = System.currentTimeMillis();
+        isServiceStarted = true;
+        mService = ((TrackingService) ((TrackingService.LocalBinder) service).getService());
+        mService.setListener(MapHelper.this);
+        mListener.onServiceStart();
+    }
+
+    private void stopTracking(){
+        endTime = System.currentTimeMillis();
+        isServiceStarted = false;
+        mService = null;
+        mListener.onServiceStop();
     }
 
     public void setListeners(MapHelperListener listener) {
@@ -67,9 +84,31 @@ public class MapHelper implements TrackingService.TrackingListener {
 
     public void stopService() {
         mContext.unbindService(connection);
-        isServiceStarted = false;
-        mService = null;
-        mListener.onServiceStop();
+        stopTracking();
+    }
+
+    public boolean saveToDatabase(String name) throws SQLException {
+        if (!mPoints.isEmpty()) {
+            MapPath mapPath = new MapPath(name,
+                    mPoints.get(0).getTime(),
+                    mPoints.get(mPoints.size()-1).getTime());
+            mDatabaseHelper.getPathDAO().create(mapPath);
+            setPathToPoints(mapPath);
+            saveAllPoints();
+
+        }
+        return false;
+    }
+
+    private void setPathToPoints(MapPath mapPath){
+        for (MapPoint mapPoint : mPoints)
+                mapPoint.setPath(mapPath);
+    }
+
+    private void saveAllPoints() throws SQLException {
+        DatabaseHelper.PointDAO dao = mDatabaseHelper.getPointDAO();
+        for (MapPoint mapPoint : mPoints)
+            dao.create(mapPoint);
     }
 
     public boolean isServiceStarted() {
@@ -83,16 +122,17 @@ public class MapHelper implements TrackingService.TrackingListener {
 
     @Override
     public void onNewPoint(Location point) {
+        MapPoint newMapPoint = new MapPoint(point.getLatitude(), point.getLongitude(), point.getTime());
         if (mListener != null) {
             if (mPoints.isEmpty()) {
                 Log.i(TAG, "startPoint");
-                mListener.onStartPoint(point);
+                mListener.onStartPoint(newMapPoint);
             } else {
                 Log.i(TAG, "newPoint");
-                mListener.onNewPoint(mPoints.get(mPoints.size() - 1), point);
+                mListener.onNewPoint(mPoints.get(mPoints.size() - 1), newMapPoint);
             }
         }
-        mPoints.add(point);
+        mPoints.add(newMapPoint);
 
     }
 
@@ -102,13 +142,13 @@ public class MapHelper implements TrackingService.TrackingListener {
 
         void onServiceStop();
 
-        void onNewPoint(Location last, Location newPoint);
+        void onNewPoint(MapPoint last, MapPoint newPoint);
 
-        void onNewPointList(List<Location> list);
+        void onNewPointList(List<MapPoint> list);
 
-        void onStartPoint(Location startPoint);
+        void onStartPoint(MapPoint startPoint);
 
-        void onEndPoint(Location endPoint);
+        void onEndPoint(MapPoint endPoint);
 
     }
 

@@ -11,20 +11,26 @@ import java.util.Date;
  */
 
 @DatabaseTable(tableName = "paths")
-public class Path {
+public class MapPath {
 
     public final static String COLUMN_NAME = "name";
     public final static String COLUMN_START_DATE = "start";
     public final static String COLUMN_END_DATE = "end";
 
+    public MapPath(String name, long start, long end){
+        this.name = name;
+        this.startTime = start;
+        this.endTime = end;
+    }
+
     @DatabaseField(id = true, canBeNull = false, dataType = DataType.STRING, columnName = COLUMN_NAME)
     private String name;
 
-    @DatabaseField(canBeNull = false, dataType = DataType.DATE, columnName = COLUMN_START_DATE)
-    private Date startDate;
+    @DatabaseField(canBeNull = false, dataType = DataType.LONG, columnName = COLUMN_START_DATE)
+    private long startTime;
 
-    @DatabaseField(canBeNull = false, dataType = DataType.DATE, columnName = COLUMN_END_DATE)
-    private Date endDate;
+    @DatabaseField(canBeNull = false, dataType = DataType.LONG, columnName = COLUMN_END_DATE)
+    private long endTime;
 
     public String getName() {
         return name;
@@ -34,19 +40,11 @@ public class Path {
         this.name = name;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public long getStartTime() {
+        return startTime;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public long getEndTime() {
+        return endTime;
     }
 }

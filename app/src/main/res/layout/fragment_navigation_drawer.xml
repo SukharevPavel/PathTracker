@@ -4,6 +4,11 @@
     tools:context="ru.sukharev.pathtracker.ui.NavigationDrawerListFragment">
 
     <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:id="@android:id/empty"
+        android:text="@string/list_is_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
     <ListView
         android:id="@android:id/list"
         android:layout_width="wrap_content"

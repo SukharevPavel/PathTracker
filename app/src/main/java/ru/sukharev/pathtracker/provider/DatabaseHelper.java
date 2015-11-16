@@ -3,6 +3,7 @@ package ru.sukharev.pathtracker.provider;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -13,8 +14,8 @@ import com.j256.ormlite.table.TableUtils;
 import java.sql.SQLException;
 import java.util.List;
 
-import ru.sukharev.pathtracker.utils.orm.Path;
-import ru.sukharev.pathtracker.utils.orm.Point;
+import ru.sukharev.pathtracker.utils.orm.MapPath;
+import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 /**
  * Helper for working with DAO
@@ -32,25 +33,25 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     }
 
     public static DatabaseHelper getInstance(Context ctx) {
-        if (mDatabaseHelper == null) mDatabaseHelper = new DatabaseHelper(ctx);
+        if (mDatabaseHelper == null) mDatabaseHelper = OpenHelperManager.getHelper(ctx, DatabaseHelper.class);
         return mDatabaseHelper;
     }
 
     public PathDAO getPathDAO() throws SQLException {
-        if (mPathDAO == null) mPathDAO = new PathDAO(getConnectionSource(), Path.class);
+        if (mPathDAO == null) mPathDAO = new PathDAO(getConnectionSource(), MapPath.class);
         return mPathDAO;
     }
 
     public PointDAO getPointDAO() throws SQLException {
-        if (mPointDAO == null) mPointDAO = new PointDAO(getConnectionSource(), Point.class);
+        if (mPointDAO == null) mPointDAO = new PointDAO(getConnectionSource(), MapPoint.class);
         return mPointDAO;
     }
 
     @Override
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
         try {
-            TableUtils.createTable(connectionSource, Path.class);
-            TableUtils.createTable(connectionSource, Point.class);
+            TableUtils.createTable(connectionSource, MapPath.class);
+            TableUtils.createTable(connectionSource, MapPoint.class);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -59,35 +60,35 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         try {
-            TableUtils.dropTable(connectionSource, Path.class, true);
-            TableUtils.dropTable(connectionSource, Point.class, true);
+            TableUtils.dropTable(connectionSource, MapPath.class, true);
+            TableUtils.dropTable(connectionSource, MapPoint.class, true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         onCreate(database, connectionSource);
     }
 
-    public static class PathDAO extends BaseDaoImpl<Path, String> {
+    public static class PathDAO extends BaseDaoImpl<MapPath, String> {
 
-        protected PathDAO(ConnectionSource connectionSource, Class<Path> dataClass) throws SQLException {
+        protected PathDAO(ConnectionSource connectionSource, Class<MapPath> dataClass) throws SQLException {
             super(connectionSource, dataClass);
         }
 
-        public List<Path> getAllPaths() throws SQLException {
+        public List<MapPath> getAllPaths() throws SQLException {
             return this.queryForAll();
         }
     }
 
-    public static class PointDAO extends BaseDaoImpl<Point, Integer> {
+    public static class PointDAO extends BaseDaoImpl<MapPoint, Integer> {
 
-        protected PointDAO(ConnectionSource connectionSource, Class<Point> dataClass) throws SQLException {
+        protected PointDAO(ConnectionSource connectionSource, Class<MapPoint> dataClass) throws SQLException {
             super(connectionSource, dataClass);
         }
 
-        public List<Point> getPointByPath(String name) throws SQLException {
-            QueryBuilder<Point, Integer> queryBuilder = queryBuilder();
-            queryBuilder.where().eq(Path.COLUMN_NAME, name);
-            PreparedQuery<Point> preparedQuery = queryBuilder.prepare();
+        public List<MapPoint> getPointByPath(String name) throws SQLException {
+            QueryBuilder<MapPoint, Integer> queryBuilder = queryBuilder();
+            queryBuilder.where().eq(MapPath.COLUMN_NAME, name);
+            PreparedQuery<MapPoint> preparedQuery = queryBuilder.prepare();
             return query(preparedQuery);
         }
     }

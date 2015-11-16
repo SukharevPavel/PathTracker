@@ -25,6 +25,7 @@ import java.util.List;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
+import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener{
 
@@ -119,7 +120,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     int i=0;
     @Override
-    public void onNewPoint(Location last, Location newPoint) {
+    public void onNewPoint(MapPoint last, MapPoint newPoint) {
       //  setUpMapIfNeeded();
         Log.i(TAG, "new point = " + last.getLatitude() + " " + last.getLongitude() );
         Log.i(TAG, "new point = " + newPoint.getLatitude() + " " + newPoint.getLongitude() );
@@ -134,14 +135,14 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
-    public void onNewPointList(List<Location> list) {
+    public void onNewPointList(List<MapPoint> list) {
         onStartPoint(list.get(0));
         for (int i=1;i<list.size(); i++)
             onNewPoint(list.get(i-1), list.get(i));
     }
 
     @Override
-    public void onStartPoint(Location startPoint) {
+    public void onStartPoint(MapPoint startPoint) {
         setUpMapIfNeeded();
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()))
@@ -150,7 +151,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
-    public void onEndPoint(Location endPoint) {
+    public void onEndPoint(MapPoint endPoint) {
 
     }
 }
