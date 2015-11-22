@@ -14,6 +14,7 @@ import com.j256.ormlite.table.TableUtils;
 import java.sql.SQLException;
 import java.util.List;
 
+import ru.sukharev.pathtracker.utils.orm.AbstractDao;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
@@ -68,28 +69,18 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         onCreate(database, connectionSource);
     }
 
-    public static class PathDAO extends BaseDaoImpl<MapPath, String> {
+    public static class PathDAO extends AbstractDao<MapPath, String> {
 
         protected PathDAO(ConnectionSource connectionSource, Class<MapPath> dataClass) throws SQLException {
             super(connectionSource, dataClass);
         }
 
-        public List<MapPath> getAllPaths() throws SQLException {
-            return this.queryForAll();
-        }
     }
 
-    public static class PointDAO extends BaseDaoImpl<MapPoint, Integer> {
+    public static class PointDAO extends AbstractDao<MapPoint, Integer> {
 
         protected PointDAO(ConnectionSource connectionSource, Class<MapPoint> dataClass) throws SQLException {
             super(connectionSource, dataClass);
-        }
-
-        public List<MapPoint> getPointByPath(String name) throws SQLException {
-            QueryBuilder<MapPoint, Integer> queryBuilder = queryBuilder();
-            queryBuilder.where().eq(MapPath.COLUMN_NAME, name);
-            PreparedQuery<MapPoint> preparedQuery = queryBuilder.prepare();
-            return query(preparedQuery);
         }
     }
 }

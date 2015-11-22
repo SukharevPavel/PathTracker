@@ -9,24 +9,13 @@ import java.util.Date;
 /**
  * That class implements ORM representation of all point, where user was.
  */
-@DatabaseTable(tableName = "points")
+@DatabaseTable(tableName = MapPoint.TABLE_NAME)
 public class MapPoint {
 
+    public final static String TABLE_NAME = "points";
     public final static String COLUMN_X = "loc_lat";
     public final static String COLUMN_Y = "loc_long";
     public final static String COLUMN_DATE = "date";
-
-    public double getLatitude() {
-        return lattitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public long getTime() {
-        return time;
-    }
 
     public MapPoint(double loc_x, double loc_y, long time){
         this.lattitude = loc_x;
@@ -36,8 +25,8 @@ public class MapPoint {
 
     }
 
-    public void setPath(MapPath path){
-        this.path = path;
+    MapPoint(){
+
     }
 
     @DatabaseField(generatedId = true)
@@ -55,6 +44,43 @@ public class MapPoint {
     @DatabaseField(canBeNull = false, dataType = DataType.LONG, columnName = COLUMN_DATE)
     private long time;
 
+    public void setPath(MapPath path){
+        this.path = path;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 
+    public void setLattitude(double lattitude) {
+        this.lattitude = lattitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public MapPath getPath() {
+        return path;
+    }
+
+    public double getLattitude() {
+        return lattitude;
+    }
 }

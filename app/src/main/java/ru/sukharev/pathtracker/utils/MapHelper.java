@@ -1,12 +1,16 @@
 package ru.sukharev.pathtracker.utils;
 
+import android.app.LoaderManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.v4.content.Loader;
 import android.util.Log;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -19,12 +23,13 @@ import ru.sukharev.pathtracker.provider.DatabaseHelper;
 import ru.sukharev.pathtracker.service.TrackingService;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
+import ru.sukharev.pathtracker.utils.orm.OrmLoader;
 
 /**
  * Presenter element which handle interaction between View {@link ru.sukharev.pathtracker.ui.MapActivity}
  * and model: Service (@link ru,sukharev.pathtracker.service.TrackingService} and Content Provider
  */
-public class MapHelper implements TrackingService.TrackingListener {
+public class MapHelper implements TrackingService.TrackingListener, LoaderCallbacks {
 
     private static final String TAG = "MapHelper.java";
     private Context mContext;
@@ -32,6 +37,11 @@ public class MapHelper implements TrackingService.TrackingListener {
     private boolean isServiceStarted = false;
     private TrackingService mService;
     private MapHelperListener mListener;
+
+    private final static int PATH_LOADER_ID = 1;
+    private final static int POINT_LOADER_ID = 2;
+
+    public final static String EXTRA_POINT_LOADER_PATH_NAME = "pathName";
 
     ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -97,6 +107,7 @@ public class MapHelper implements TrackingService.TrackingListener {
             mDatabaseHelper.getPathDAO().create(mapPath);
             setPathToPoints(mapPath);
             saveAllPoints();
+            return true;
 
         }
         return false;
@@ -137,6 +148,46 @@ public class MapHelper implements TrackingService.TrackingListener {
         mPoints.add(newMapPoint);
 
     }
+
+
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case PATH_LOADER_ID:
+                return new OrmLoader(mContext,
+                        mDatabaseHelper,
+                        MapPath.TABLE_NAME,
+                        null,
+                        null,
+                        null);
+
+            case POINT_LOADER_ID:
+                String pathName = null;
+                if (args != null && args.containsKey(EXTRA_POINT_LOADER_PATH_NAME))
+                    pathName = args.getString(EXTRA_POINT_LOADER_PATH_NAME);
+
+                return new OrmLoader(mContext,
+                        mDatabaseHelper,
+                        MapPoint.TABLE_NAME,
+                        MapPath.COLUMN_NAME,
+                        new String[]{pathName},
+                        MapPoint.COLUMN_DATE);
+
+            default: return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(android.support.v4.content.Loader loader, Object data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(android.support.v4.content.Loader loader) {
+
+    }
+
+
 
     public interface MapHelperListener {
 

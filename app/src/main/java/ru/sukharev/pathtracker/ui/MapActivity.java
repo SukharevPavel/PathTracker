@@ -132,16 +132,16 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     @Override
     public void onNewPoint(MapPoint last, MapPoint newPoint) {
       //  setUpMapIfNeeded();
-        Log.i(TAG, "new point = " + last.getLatitude() + " " + last.getLongitude() );
-        Log.i(TAG, "new point = " + newPoint.getLatitude() + " " + newPoint.getLongitude() );
-        Toast.makeText(this,"new point = " + newPoint.getLatitude() + " " + newPoint.getLongitude(),Toast.LENGTH_LONG).show();
+        Log.i(TAG, "new point = " + last.getLattitude() + " " + last.getLongitude() );
+        Log.i(TAG, "new point = " + newPoint.getLattitude() + " " + newPoint.getLongitude() );
+        Toast.makeText(this,"new point = " + newPoint.getLattitude() + " " + newPoint.getLongitude(),Toast.LENGTH_LONG).show();
         /*mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(newPoint.getLatitude(), newPoint.getLongitude()))
                 .title(String.valueOf(i++)));*/
             mMap.addPolyline(new PolylineOptions().geodesic(true)
-                    .add(new LatLng(last.getLatitude(), last.getLongitude()))
-                    .add(new LatLng(newPoint.getLatitude(), newPoint.getLongitude())));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(newPoint.getLatitude(), newPoint.getLongitude()), 10));
+                    .add(new LatLng(last.getLattitude(), last.getLongitude()))
+                    .add(new LatLng(newPoint.getLattitude(), newPoint.getLongitude())));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(newPoint.getLattitude(), newPoint.getLongitude()), 10));
     }
 
     @Override
@@ -155,9 +155,9 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onStartPoint(MapPoint startPoint) {
         setUpMapIfNeeded();
         mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()))
+                .position(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()))
                 .title("Start"));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startPoint.getLatitude(), startPoint.getLongitude()),10));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()),10));
     }
 
     @Override
@@ -169,6 +169,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onGetName(String name) {
         try {
             if (!mControlFragment.saveToDatabase(name)) Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_LONG).show();
+            else Log.i(TAG,"successfully saved");
         } catch (SQLException e) {
             Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_LONG).show();
             e.printStackTrace();
