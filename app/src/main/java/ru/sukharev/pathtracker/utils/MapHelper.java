@@ -29,7 +29,7 @@ import ru.sukharev.pathtracker.utils.orm.OrmLoader;
  * Presenter element which handle interaction between View {@link ru.sukharev.pathtracker.ui.MapActivity}
  * and model: Service (@link ru,sukharev.pathtracker.service.TrackingService} and Content Provider
  */
-public class MapHelper implements TrackingService.TrackingListener, LoaderCallbacks {
+public class MapHelper implements TrackingService.TrackingListener{
 
     private static final String TAG = "MapHelper.java";
     private Context mContext;
@@ -37,13 +37,9 @@ public class MapHelper implements TrackingService.TrackingListener, LoaderCallba
     private boolean isServiceStarted = false;
     private TrackingService mService;
     private MapHelperListener mListener;
+    private DatabaseHelper mDatabaseHelper;
 
-    private final static int PATH_LOADER_ID = 1;
-    private final static int POINT_LOADER_ID = 2;
-
-    public final static String EXTRA_POINT_LOADER_PATH_NAME = "pathName";
-
-    ServiceConnection connection = new ServiceConnection() {
+    private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.i(TAG, "service connected");
@@ -58,7 +54,7 @@ public class MapHelper implements TrackingService.TrackingListener, LoaderCallba
             stopTracking();
         }
     };
-    private DatabaseHelper mDatabaseHelper;
+
 
     public MapHelper(@NonNull Context ctx) {
         mContext = ctx;
@@ -98,6 +94,8 @@ public class MapHelper implements TrackingService.TrackingListener, LoaderCallba
     public void clearData(){
         mPoints.clear();
     }
+
+
 
     public boolean saveToDatabase(String name) throws SQLException {
         if (!mPoints.isEmpty()) {
@@ -150,42 +148,6 @@ public class MapHelper implements TrackingService.TrackingListener, LoaderCallba
     }
 
 
-    @Override
-    public Loader onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case PATH_LOADER_ID:
-                return new OrmLoader(mContext,
-                        mDatabaseHelper,
-                        MapPath.TABLE_NAME,
-                        null,
-                        null,
-                        null);
-
-            case POINT_LOADER_ID:
-                String pathName = null;
-                if (args != null && args.containsKey(EXTRA_POINT_LOADER_PATH_NAME))
-                    pathName = args.getString(EXTRA_POINT_LOADER_PATH_NAME);
-
-                return new OrmLoader(mContext,
-                        mDatabaseHelper,
-                        MapPoint.TABLE_NAME,
-                        MapPath.COLUMN_NAME,
-                        new String[]{pathName},
-                        MapPoint.COLUMN_DATE);
-
-            default: return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(android.support.v4.content.Loader loader, Object data) {
-
-    }
-
-    @Override
-    public void onLoaderReset(android.support.v4.content.Loader loader) {
-
-    }
 
 
 
