@@ -14,5 +14,7 @@
 
     <!--fragment_navigation_drawer -->
     <string name="list_is_empty">Empty list</string>
+    <string name="drawer_open">Open drawer</string>
+    <string name="drawer_close">Close drawer</string>
 
 </resources>

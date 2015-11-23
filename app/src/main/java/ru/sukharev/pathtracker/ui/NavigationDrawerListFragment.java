@@ -2,16 +2,22 @@ package ru.sukharev.pathtracker.ui;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,6 +35,9 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     private final static int PATH_LOADER_ID = 1;
     private PathAdapter mAdapter;
 
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
+
     public NavigationDrawerListFragment() {
         // Required empty public constructor
     }
@@ -45,7 +54,9 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mAdapter = new PathAdapter(getContext(), R.layout.navigation_drawer_list_item, null);
+        mAdapter = new PathAdapter(getContext(),
+                R.layout.navigation_drawer_list_item,
+                new ArrayList<MapPath>());
         return inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
     }
 
@@ -67,13 +78,61 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     @Override
     public void onLoadFinished(Loader loader, Object data) {
-        mAdapter.replaceList((List<MapPath>) data);
+        if (mAdapter != null)
+            mAdapter.replaceList((List<MapPath>) data);
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
 
     }
+
+    public void setUp(DrawerLayout drawerLayout, Toolbar toolbar) {
+        mDrawerLayout = drawerLayout;
+        //mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        mDrawerToggle = new ActionBarDrawerToggle(
+                getActivity(),                    /* host Activity */
+                mDrawerLayout,                    /* DrawerLayout object */
+                toolbar,             /* nav drawer image to replace 'Up' caret */
+                R.string.drawer_open,  /* "open drawer" description for accessibility */
+                R.string.drawer_close  /* "close drawer" description for accessibility */
+        ) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                if (!isAdded()) {
+                    return;
+                }
+
+                getActivity().supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                if (!isAdded()) {
+                    return;
+                }
+
+                getActivity().supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+        };
+
+        // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
+        // per the navigation drawer design guidelines.
+
+        // Defer code dependent on restoration of previous instance state.
+        mDrawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mDrawerToggle.syncState();
+            }
+        });
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+    }
+
+
 
     public static class PathAdapter extends ArrayAdapter<MapPath>{
 

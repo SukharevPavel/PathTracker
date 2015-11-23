@@ -11,7 +11,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,14 +44,23 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
     private ControlFragment mControlFragment;
+    private NavigationDrawerListFragment mNavigationDrawerFragment;
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
+
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         setUpMapIfNeeded();
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        mNavigationDrawerFragment = (NavigationDrawerListFragment) getSupportFragmentManager().
+                findFragmentById(R.id.navigation_drawer_list_fragment);
+        mNavigationDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout),
+                mToolbar);
         mControlFragment = (ControlFragment) getSupportFragmentManager().
                 findFragmentById(R.id.control_fragment);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
