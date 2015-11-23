@@ -16,5 +16,7 @@
     <string name="list_is_empty">Empty list</string>
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Close drawer</string>
+    <string name="context_menu_delete_item">Delete path</string>
+    <string name="error_delete_path">Failed to delete path</string>
 
 </resources>

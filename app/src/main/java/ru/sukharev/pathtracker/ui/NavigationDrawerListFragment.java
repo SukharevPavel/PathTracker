@@ -2,29 +2,30 @@ package ru.sukharev.pathtracker.ui;
 
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
-import ru.sukharev.pathtracker.utils.orm.MapPoint;
 import ru.sukharev.pathtracker.utils.orm.OrmLoader;
 
 /**
@@ -46,7 +47,11 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(PATH_LOADER_ID, null, this).forceLoad();
+        getLoaderManager().initLoader(PATH_LOADER_ID, null, this);
+        mAdapter = new PathAdapter(getContext(),
+                R.layout.navigation_drawer_list_item,
+                new ArrayList<MapPath>());
+        setListAdapter(mAdapter);
         setRetainInstance(true);
     }
 
@@ -54,17 +59,46 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mAdapter = new PathAdapter(getContext(),
-                R.layout.navigation_drawer_list_item,
-                new ArrayList<MapPath>());
+
         return inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        registerForContextMenu(getListView());
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
     }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getActivity().getMenuInflater().inflate(R.menu.context_list_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.delete_item:
+                try {
+                    deletePathFromDatabase(mAdapter.getItem(info.position));
+                    mAdapter.remove(mAdapter.getItem(info.position));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), getString(R.string.error_delete_path), Toast.LENGTH_LONG).show();
+                    return super.onContextItemSelected(item);
+                }
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private void deletePathFromDatabase(MapPath path) throws SQLException {
+        DatabaseHelper.getInstance(getContext()).getPathDAO().delete(path);
+    }
+
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
@@ -89,7 +123,6 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     public void setUp(DrawerLayout drawerLayout, Toolbar toolbar) {
         mDrawerLayout = drawerLayout;
-        //mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         mDrawerToggle = new ActionBarDrawerToggle(
                 getActivity(),                    /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */

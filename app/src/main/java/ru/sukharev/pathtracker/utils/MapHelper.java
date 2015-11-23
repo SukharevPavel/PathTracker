@@ -1,29 +1,22 @@
 package ru.sukharev.pathtracker.utils;
 
-import android.app.LoaderManager;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
-import android.support.v4.content.Loader;
 import android.util.Log;
 
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
 import ru.sukharev.pathtracker.service.TrackingService;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
-import ru.sukharev.pathtracker.utils.orm.OrmLoader;
 
 /**
  * Presenter element which handle interaction between View {@link ru.sukharev.pathtracker.ui.MapActivity}
@@ -58,7 +51,7 @@ public class MapHelper implements TrackingService.TrackingListener{
 
     public MapHelper(@NonNull Context ctx) {
         mContext = ctx;
-        mPoints = new LinkedList<>();
+        mPoints = new ArrayList<>();
         mDatabaseHelper = DatabaseHelper.getInstance(ctx);
     }
 
