@@ -36,6 +36,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     private final static int PATH_LOADER_ID = 1;
     private PathAdapter mAdapter;
 
+    private View mDrawerView;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private PathItemClickListener mPathListener;
@@ -44,6 +45,8 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (mPathListener != null)
                 mPathListener.onPathClick(mAdapter.getItem(position));
+            if (mDrawerLayout != null)
+                mDrawerLayout.closeDrawer(mDrawerView);
         }
     };
 
@@ -51,6 +54,10 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     public NavigationDrawerListFragment() {
         // Required empty public constructor
+    }
+
+    public void reloadList() {
+        getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
     }
 
 
@@ -133,8 +140,9 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     }
 
-    public void setUp(DrawerLayout drawerLayout, Toolbar toolbar) {
+    public void setUp(DrawerLayout drawerLayout, Toolbar toolbar, int fragmentId) {
         mDrawerLayout = drawerLayout;
+        mDrawerView = getActivity().findViewById(R.id.navigation_drawer_list_fragment);
         mDrawerToggle = new ActionBarDrawerToggle(
                 getActivity(),                    /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */

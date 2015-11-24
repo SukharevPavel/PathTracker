@@ -54,7 +54,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         mNavigationDrawerFragment = (NavigationDrawerListFragment) getSupportFragmentManager().
                 findFragmentById(R.id.navigation_drawer_list_fragment);
         mNavigationDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout),
-                mToolbar);
+                mToolbar, R.id.navigation_drawer_list_fragment);
         mControlFragment = (ControlFragment) getSupportFragmentManager().
                 findFragmentById(R.id.control_fragment);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -156,7 +156,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         while (iterator.hasNext()) {
             newPoint = iterator.next();
             if (oldPoint == null)
-                onStartPoint(iterator.next());
+                onStartPoint(newPoint);
             else
                 onNewPoint(oldPoint, newPoint);
             oldPoint = newPoint;
@@ -181,7 +181,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onGetName(String name) {
         try {
             if (!mControlFragment.saveToDatabase(name)) Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_LONG).show();
-            else Log.i(TAG,"successfully saved");
+            else mNavigationDrawerFragment.reloadList();
         } catch (SQLException e) {
             Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_LONG).show();
             e.printStackTrace();
