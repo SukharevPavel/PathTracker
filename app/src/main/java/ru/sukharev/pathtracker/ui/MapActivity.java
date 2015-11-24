@@ -10,7 +10,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,7 +31,8 @@ import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener,
-        PathNamingFragment.DialogPathNamingListener, NavigationDrawerListFragment.PathItemClickListener {
+        PathNamingFragment.DialogPathNamingListener, NavigationDrawerListFragment.PathItemClickListener,
+        ControlFragment.CurrentButtonListener {
 
     private final static String TAG = "MapActivity.java";
 
@@ -43,6 +43,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private ControlFragment mControlFragment;
     private NavigationDrawerListFragment mNavigationDrawerFragment;
     private Toolbar mToolbar;
+
+    private boolean isShowingSaved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +66,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     protected void onResume() {
+        setUpMapIfNeeded();
         super.onResume();
     }
 
@@ -89,8 +92,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     /**
      * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
+     * installed) and the map has not already been instantiated..
      * <p/>
      * If it isn't installed {@link SupportMapFragment} (and
      * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
@@ -115,9 +117,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
      * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
-    private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
-    }
 
     @Override
     public void onServiceStart() {
@@ -133,43 +132,58 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onNewPoint(MapPoint last, MapPoint newPoint) {
-      //  setUpMapIfNeeded();
-        Log.i(TAG, "new point = " + last.getLattitude() + " " + last.getLongitude() );
-        Log.i(TAG, "new point = " + newPoint.getLattitude() + " " + newPoint.getLongitude() );
-        Toast.makeText(this,"new point = " + newPoint.getLattitude() + " " + newPoint.getLongitude(),Toast.LENGTH_LONG).show();
-        /*mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(newPoint.getLatitude(), newPoint.getLongitude()))
-                .title(String.valueOf(i++)));*/
-            mMap.addPolyline(new PolylineOptions().geodesic(true)
-                    .add(new LatLng(last.getLattitude(), last.getLongitude()))
-                    .add(new LatLng(newPoint.getLattitude(), newPoint.getLongitude())));
+        if (!isShowingSaved) setNewPoint(last, newPoint);
+    }
+
+    private void setNewPoint(MapPoint last, MapPoint newPoint) {
+        setUpMapIfNeeded();
+        mMap.addPolyline(new PolylineOptions().geodesic(true)
+                .add(new LatLng(last.getLattitude(), last.getLongitude()))
+                .add(new LatLng(newPoint.getLattitude(), newPoint.getLongitude())));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(newPoint.getLattitude(), newPoint.getLongitude()), 10));
     }
 
     @Override
     public void onNewPointList(List<MapPoint> list) {
-        setNewMapPoints(list.iterator());
+        if (!isShowingSaved)
+            setNewMapPoints(list.iterator());
     }
 
     private void setNewMapPoints(Iterator<MapPoint> iterator) {
+        setUpMapIfNeeded();
+        mMap.clear();
         MapPoint newPoint, oldPoint = null;
         while (iterator.hasNext()) {
             newPoint = iterator.next();
             if (oldPoint == null)
-                onStartPoint(newPoint);
+                setStartPoint(newPoint);
             else
-                onNewPoint(oldPoint, newPoint);
+                setNewPoint(oldPoint, newPoint);
             oldPoint = newPoint;
         }
     }
 
     @Override
     public void onStartPoint(MapPoint startPoint) {
+        if (!isShowingSaved) setStartPoint(startPoint);
+    }
+
+    private void setStartPoint(MapPoint startPoint) {
         setUpMapIfNeeded();
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()))
                 .title("Start"));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()),10));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()), 10));
+    }
+
+    private void enableWatchingSavedPathMode() {
+        isShowingSaved = true;
+        mControlFragment.showCurrentPathButton(true);
+    }
+
+    private void disableWatchingSavedPathMode() {
+        isShowingSaved = false;
+        mControlFragment.showCurrentPathButton(false);
     }
 
     @Override
@@ -202,7 +216,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             }
         }
 
-        //T0D0 show button to return to current path if u want
+        enableWatchingSavedPathMode();
     }
 
+    @Override
+    public void onCurrentButtonClick() {
+        disableWatchingSavedPathMode();
+    }
 }

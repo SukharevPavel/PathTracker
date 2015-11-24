@@ -120,7 +120,7 @@ public class MapHelper implements TrackingService.TrackingListener{
     }
 
     public void getList() {
-        if (mPoints != null && !mPoints.isEmpty() && mListener != null)
+        if (mPoints != null && mListener != null)
             mListener.onNewPointList(mPoints);
     }
 

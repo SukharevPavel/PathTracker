@@ -1,12 +1,20 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context="ru.sukharev.pathtracker.ui.ControlFragment">
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context="ru.sukharev.pathtracker.ui.ControlFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <Button
         android:id="@+id/button_control_service"
-        android:text="@string/button_start_service"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="@string/button_start_service" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/button_show_current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_show_current"
+        android:visibility="gone" />
+</LinearLayout>
