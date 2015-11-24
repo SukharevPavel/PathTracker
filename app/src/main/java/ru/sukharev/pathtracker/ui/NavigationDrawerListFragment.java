@@ -38,6 +38,16 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+    private PathItemClickListener mPathListener;
+    private AdapterView.OnItemClickListener mItemListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if (mPathListener != null)
+                mPathListener.onPathClick(mAdapter.getItem(position));
+        }
+    };
+
+
 
     public NavigationDrawerListFragment() {
         // Required empty public constructor
@@ -68,6 +78,8 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         super.onActivityCreated(savedInstanceState);
         registerForContextMenu(getListView());
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
+        mPathListener = (PathItemClickListener) getActivity();
+        getListView().setOnItemClickListener(mItemListener);
     }
 
     @Override
@@ -166,10 +178,17 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     }
 
 
+    public interface PathItemClickListener {
+
+        void onPathClick(MapPath path);
+
+    }
+
 
     public static class PathAdapter extends ArrayAdapter<MapPath>{
 
         private int mResource;
+
 
         public PathAdapter(Context context, int resource,  List<MapPath> objects) {
             super(context, resource, objects);

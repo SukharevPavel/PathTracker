@@ -2,22 +2,15 @@ package ru.sukharev.pathtracker.ui;
 
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
-import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -26,28 +19,29 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.j256.ormlite.dao.CloseableIterator;
+import com.j256.ormlite.dao.ForeignCollection;
 
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
+import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener,
-        PathNamingFragment.DialogPathNamingListener{
+        PathNamingFragment.DialogPathNamingListener, NavigationDrawerListFragment.PathItemClickListener {
 
     private final static String TAG = "MapActivity.java";
 
     private final static String PATH_NAMING_FRAGMENT_TAG = "path_naming_fragment";
-
+    private static final int REQUEST_LOCATION_PERMISSION = 1;
+    int i = 0;
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-
     private ControlFragment mControlFragment;
     private NavigationDrawerListFragment mNavigationDrawerFragment;
-
-    private static final int REQUEST_LOCATION_PERMISSION = 1;
-
     private Toolbar mToolbar;
 
     @Override
@@ -125,7 +119,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
-
     @Override
     public void onServiceStart() {
         mControlFragment.changeButtonText(getString(R.string.button_stop_service));
@@ -138,8 +131,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         fragment.show(getSupportFragmentManager(), PATH_NAMING_FRAGMENT_TAG);
     }
 
-
-    int i=0;
     @Override
     public void onNewPoint(MapPoint last, MapPoint newPoint) {
       //  setUpMapIfNeeded();
@@ -157,9 +148,19 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onNewPointList(List<MapPoint> list) {
-        onStartPoint(list.get(0));
-        for (int i=1;i<list.size(); i++)
-            onNewPoint(list.get(i-1), list.get(i));
+        setNewMapPoints(list.iterator());
+    }
+
+    private void setNewMapPoints(Iterator<MapPoint> iterator) {
+        MapPoint newPoint, oldPoint = null;
+        while (iterator.hasNext()) {
+            newPoint = iterator.next();
+            if (oldPoint == null)
+                onStartPoint(iterator.next());
+            else
+                onNewPoint(oldPoint, newPoint);
+            oldPoint = newPoint;
+        }
     }
 
     @Override
@@ -185,6 +186,23 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onPathClick(MapPath path) {
+        ForeignCollection<MapPoint> points = path.getPoints();
+        CloseableIterator<MapPoint> iterator = points.closeableIterator();
+        try {
+            setNewMapPoints(iterator);
+        } finally {
+            try {
+                iterator.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //T0D0 show button to return to current path if u want
     }
 
 }

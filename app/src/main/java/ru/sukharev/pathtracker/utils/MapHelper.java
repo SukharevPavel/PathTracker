@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
@@ -51,7 +51,7 @@ public class MapHelper implements TrackingService.TrackingListener{
 
     public MapHelper(@NonNull Context ctx) {
         mContext = ctx;
-        mPoints = new ArrayList<>();
+        mPoints = new LinkedList<>();
         mDatabaseHelper = DatabaseHelper.getInstance(ctx);
     }
 
@@ -95,8 +95,8 @@ public class MapHelper implements TrackingService.TrackingListener{
             MapPath mapPath = new MapPath(name,
                     mPoints.get(0).getTime(),
                     mPoints.get(mPoints.size()-1).getTime());
-            mDatabaseHelper.getPathDAO().create(mapPath);
             setPathToPoints(mapPath);
+            mDatabaseHelper.getPathDAO().create(mapPath);
             saveAllPoints();
             return true;
 
