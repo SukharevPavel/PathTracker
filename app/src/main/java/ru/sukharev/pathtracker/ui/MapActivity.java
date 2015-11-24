@@ -184,6 +184,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private void disableWatchingSavedPathMode() {
         isShowingSaved = false;
         mControlFragment.showCurrentPathButton(false);
+        mNavigationDrawerFragment.invalidateSelection();
     }
 
     @Override

@@ -33,6 +33,7 @@ import ru.sukharev.pathtracker.utils.orm.OrmLoader;
  */
 public class NavigationDrawerListFragment extends ListFragment implements LoaderManager.LoaderCallbacks {
 
+    public final static int NO_SELECTION = -1;
     private final static int PATH_LOADER_ID = 1;
     private PathAdapter mAdapter;
 
@@ -40,11 +41,14 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private PathItemClickListener mPathListener;
+    private int mSelectedItem = NO_SELECTION;
     private AdapterView.OnItemClickListener mItemListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (mPathListener != null)
-                mPathListener.onPathClick(mAdapter.getItem(position));
+            if (mPathListener != null) {
+                mSelectedItem = position;
+                selectItem(mSelectedItem);
+            }
             if (mDrawerLayout != null)
                 mDrawerLayout.closeDrawer(mDrawerView);
         }
@@ -87,6 +91,16 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
         mPathListener = (PathItemClickListener) getActivity();
         getListView().setOnItemClickListener(mItemListener);
+        selectItem(mSelectedItem);
+    }
+
+    private void selectItem(int position) {
+        if (position != NO_SELECTION)
+            mPathListener.onPathClick(mAdapter.getItem(position));
+    }
+
+    public void invalidateSelection() {
+        mSelectedItem = NO_SELECTION;
     }
 
     @Override
