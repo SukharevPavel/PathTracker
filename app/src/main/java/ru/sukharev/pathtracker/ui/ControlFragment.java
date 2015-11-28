@@ -31,12 +31,27 @@ public class ControlFragment extends Fragment {
     };
     private Button mControlButton;
     private Button mCurrentPathButton;
-    private CurrentButtonListener mListener;
+    private Button mSaveButton;
+    private Button mClearButton;
+    private ControlFragmentListener mListener;
     private final View.OnClickListener mCurrentButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             mListener.onCurrentButtonClick();
             mHelper.getList();
+        }
+    };
+
+    private final View.OnClickListener mSaveButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mListener.onSaveButtonClick();
+        }
+    };
+    private final View.OnClickListener mClearButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mListener.onClearButtonClick();
         }
     };
 
@@ -56,7 +71,7 @@ public class ControlFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_control, container, false);
-        mListener = (CurrentButtonListener) getActivity();
+        mListener = (ControlFragmentListener) getActivity();
         mHelper.setListeners((MapHelper.MapHelperListener) getActivity());
 
         mControlButton = (Button) view.findViewById(R.id.button_control_service);
@@ -64,6 +79,12 @@ public class ControlFragment extends Fragment {
 
         mCurrentPathButton = (Button) view.findViewById(R.id.button_show_current);
         mCurrentPathButton.setOnClickListener(mCurrentButtonListener);
+
+        mClearButton = (Button) view.findViewById(R.id.button_clear);
+        mClearButton.setOnClickListener(mClearButtonListener);
+
+        mSaveButton = (Button) view.findViewById(R.id.button_save);
+        mSaveButton.setOnClickListener(mSaveButtonListener);
 
 
         if (mHelper.isServiceStarted()) changeButtonText(getString(R.string.button_stop_service));
@@ -74,7 +95,7 @@ public class ControlFragment extends Fragment {
 
     public void showCurrentPathButton(boolean visibility) {
         if (visibility) mCurrentPathButton.setVisibility(View.VISIBLE);
-        else mCurrentPathButton.setVisibility(View.GONE);
+        else mCurrentPathButton.setVisibility(View.INVISIBLE);
     }
 
     public void changeButtonText(String text){
@@ -85,9 +106,17 @@ public class ControlFragment extends Fragment {
         return mHelper.saveToDatabase(name);
     }
 
-    public interface CurrentButtonListener {
+    public void clearData(){
+        mHelper.clearData();
+    }
+
+    public interface ControlFragmentListener {
 
         void onCurrentButtonClick();
+
+        void onSaveButtonClick();
+
+        void onClearButtonClick();
 
     }
 

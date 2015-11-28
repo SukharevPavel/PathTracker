@@ -26,17 +26,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import ru.sukharev.pathtracker.R;
+import ru.sukharev.pathtracker.ui.dialog.ClearDialogFragment;
+import ru.sukharev.pathtracker.ui.dialog.PathNamingFragment;
 import ru.sukharev.pathtracker.utils.MapHelper;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener,
         PathNamingFragment.DialogPathNamingListener, NavigationDrawerListFragment.PathItemClickListener,
-        ControlFragment.CurrentButtonListener {
+        ControlFragment.ControlFragmentListener, ClearDialogFragment.DialogClearListener {
 
     private final static String TAG = "MapActivity.java";
 
     private final static String PATH_NAMING_FRAGMENT_TAG = "path_naming_fragment";
+    private final static String CLEAR_FRAGMENT_TAG = "clear_fragment";
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     int i = 0;
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -59,9 +62,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
                 mToolbar, R.id.navigation_drawer_list_fragment);
         mControlFragment = (ControlFragment) getSupportFragmentManager().
                 findFragmentById(R.id.control_fragment);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             checkPermission();
-        }
     }
 
     @Override
@@ -111,6 +113,20 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         }
     }
 
+    private void showPathNamingFragment(){
+        PathNamingFragment fragment = new PathNamingFragment();
+        fragment.show(getSupportFragmentManager(), PATH_NAMING_FRAGMENT_TAG);
+    }
+
+    private void showClearFragment(){
+        ClearDialogFragment fragment = new ClearDialogFragment();
+        fragment.show(getSupportFragmentManager(), CLEAR_FRAGMENT_TAG);
+    }
+
+    private void clearMap(){
+        if (mMap != null) mMap.clear();
+    }
+
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
      * just add a marker near Africa.
@@ -120,14 +136,14 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onServiceStart() {
+        clearMap();
         mControlFragment.changeButtonText(getString(R.string.button_stop_service));
     }
 
     @Override
     public void onServiceStop() {
         mControlFragment.changeButtonText(getString(R.string.button_start_service));
-        PathNamingFragment fragment = new PathNamingFragment();
-        fragment.show(getSupportFragmentManager(), PATH_NAMING_FRAGMENT_TAG);
+        //askForNameToSave();
     }
 
     @Override
@@ -151,7 +167,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     private void setNewMapPoints(Iterator<MapPoint> iterator) {
         setUpMapIfNeeded();
-        mMap.clear();
+        clearMap();
         MapPoint newPoint, oldPoint = null;
         while (iterator.hasNext()) {
             newPoint = iterator.next();
@@ -170,6 +186,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     private void setStartPoint(MapPoint startPoint) {
         setUpMapIfNeeded();
+        clearMap();
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()))
                 .title("Start"));
@@ -223,5 +240,21 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     @Override
     public void onCurrentButtonClick() {
         disableWatchingSavedPathMode();
+    }
+
+    @Override
+    public void onSaveButtonClick(){
+        showPathNamingFragment();
+    }
+
+    @Override
+    public void onClearButtonClick() {
+        showClearFragment();
+    }
+
+    @Override
+    public void onClear() {
+        clearMap();
+        mControlFragment.clearData();
     }
 }

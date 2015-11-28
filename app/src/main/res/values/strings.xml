@@ -4,14 +4,20 @@
 
     <string name="error_saving_to_db">Error saving to database</string>
     <string name="error_saving_list_is_empty">List of points is empty</string>
-    <!--fragment_dialog_path_naming-->
+    <!--fragment_dialogs-->
     <string name="type_path_name">Type name of path</string>
     <string name="dialog_save">Save</string>
     <string name="dialog_cancel">Cancel</string>
+
+    <string name="dialog_is_really_clear">Do you really want to clear current path?</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
     <!--fragment_control -->
     <string name="button_start_service">Start</string>
     <string name="button_stop_service">Stop</string>
+    <string name="button_save">Save</string>
     <string name="button_show_current">Show current</string>
+    <string name="button_clear">Clear</string>
 
     <!--fragment_navigation_drawer -->
     <string name="list_is_empty">Empty list</string>

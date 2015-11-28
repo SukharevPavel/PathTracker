@@ -74,7 +74,6 @@ public class MapHelper implements TrackingService.TrackingListener{
 
     public void startService() {
         Log.i(TAG, "startService()");
-        clearData();
         Intent intent = new Intent(mContext, TrackingService.class);
         mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }

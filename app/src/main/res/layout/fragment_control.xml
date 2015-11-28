@@ -11,10 +11,24 @@
         android:layout_height="wrap_content"
         android:text="@string/button_start_service" />
 
+
+    <Button
+        android:id="@+id/button_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_save" />
+
     <Button
         android:id="@+id/button_show_current"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_show_current"
-        android:visibility="gone" />
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/button_clear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_clear" />
+
 </LinearLayout>
