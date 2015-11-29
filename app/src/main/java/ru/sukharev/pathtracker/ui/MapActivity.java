@@ -41,7 +41,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private final static String PATH_NAMING_FRAGMENT_TAG = "path_naming_fragment";
     private final static String CLEAR_FRAGMENT_TAG = "clear_fragment";
     private static final int REQUEST_LOCATION_PERMISSION = 1;
-    int i = 0;
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ControlFragment mControlFragment;
     private NavigationDrawerListFragment mNavigationDrawerFragment;
@@ -110,6 +109,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         if (mMap == null) {
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment))
                     .getMap();
+            mMap.setMyLocationEnabled(true);
         }
     }
 
