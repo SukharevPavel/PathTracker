@@ -7,22 +7,25 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.ForeignCollection;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import ru.sukharev.pathtracker.R;
@@ -45,6 +48,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private ControlFragment mControlFragment;
     private NavigationDrawerListFragment mNavigationDrawerFragment;
     private Toolbar mToolbar;
+    private Polyline mPolyline;
 
     private boolean isShowingSaved;
 
@@ -109,7 +113,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         if (mMap == null) {
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment))
                     .getMap();
-            mMap.setMyLocationEnabled(true);
         }
     }
 
@@ -124,7 +127,10 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     private void clearMap(){
-        if (mMap != null) mMap.clear();
+        if (mMap != null) {
+            mMap.clear();
+            removePolyline();
+        }
     }
 
     /**
@@ -136,7 +142,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onServiceStart() {
-        clearMap();
         mControlFragment.changeButtonText(getString(R.string.button_stop_service));
     }
 
@@ -147,16 +152,52 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
-    public void onNewPoint(MapPoint last, MapPoint newPoint) {
-        if (!isShowingSaved) setNewPoint(last, newPoint);
+    public void onNewPoint(MapPoint newPoint) {
+        if (!isShowingSaved) setNewPoint(newPoint);
     }
 
-    private void setNewPoint(MapPoint last, MapPoint newPoint) {
+
+    private void removePolyline() {
+        if (mPolyline != null) {
+            mPolyline.remove();
+            mPolyline = null;
+        }
+    }
+
+    private void updatePolyline(Iterable<LatLng> list) {
+        Iterable<LatLng> resultList = null;
+        if (mPolyline != null) {
+            resultList = mPolyline.getPoints();
+            removePolyline();
+        }
+        PolylineOptions options = new PolylineOptions().
+                geodesic(true).
+                color(ContextCompat.getColor(this, R.color.red_lt));
+        if (resultList != null) options.addAll(resultList);
+        if (list != null) options.addAll(list);
+        mPolyline = mMap.addPolyline(options);
+
+    }
+
+
+    private void addOnePoint(MapPoint newPoint) {
+        updatePolyline(Collections.singletonList(newPoint.toLatLng()));
+    }
+
+    private void addListOfPoints(Iterator<MapPoint> iterator) {
+        LinkedList<LatLng> newList = new LinkedList<>();
+        while (iterator.hasNext())
+            newList.add(iterator.next().toLatLng());
+        updatePolyline(newList);
+    }
+
+    private void setNewPoint(MapPoint newPoint) {
         setUpMapIfNeeded();
-        mMap.addPolyline(new PolylineOptions().geodesic(true)
+        addOnePoint(newPoint);
+       /* mMap.addPolyline(new PolylineOptions().geodesic(true)
+                .color(ContextCompat.getColor(this, R.color.red_lt))
                 .add(new LatLng(last.getLattitude(), last.getLongitude()))
-                .add(new LatLng(newPoint.getLattitude(), newPoint.getLongitude())));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(newPoint.getLattitude(), newPoint.getLongitude()), 10));
+                .add(new LatLng(newPoint.getLattitude(), newPoint.getLongitude())));*/
     }
 
     @Override
@@ -168,14 +209,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private void setNewMapPoints(Iterator<MapPoint> iterator) {
         setUpMapIfNeeded();
         clearMap();
-        MapPoint newPoint, oldPoint = null;
-        while (iterator.hasNext()) {
+        MapPoint newPoint;
+        if (iterator.hasNext()) {
             newPoint = iterator.next();
-            if (oldPoint == null)
-                setStartPoint(newPoint);
-            else
-                setNewPoint(oldPoint, newPoint);
-            oldPoint = newPoint;
+            setStartPoint(newPoint);
+            addListOfPoints(iterator);
         }
     }
 
@@ -190,7 +228,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()))
                 .title("Start"));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()), 10));
+        addOnePoint(startPoint);
     }
 
     private void enableWatchingSavedPathMode() {

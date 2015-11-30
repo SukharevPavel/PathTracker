@@ -136,7 +136,10 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         Location point = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         MapPoint newMapPoint = new MapPoint(point.getLatitude(), point.getLongitude(), point.getTime());
-        mListener.onStartPoint(newMapPoint);
+
+        //Checking if we start a new tracking on just a resume previous
+        if (mPoints.isEmpty()) mListener.onStartPoint(newMapPoint);
+        else mListener.onNewPoint(newMapPoint);
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
         mPoints.add(newMapPoint);
@@ -157,7 +160,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         Location point = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         MapPoint newMapPoint = new MapPoint(point.getLatitude(), point.getLongitude(), point.getTime());
-        mListener.onNewPoint(mPoints.get(mPoints.size() - 1), newMapPoint);
+        mListener.onNewPoint(newMapPoint);
         mPoints.add(newMapPoint);
     }
 
@@ -169,7 +172,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
         void onServiceStop();
 
-        void onNewPoint(MapPoint last, MapPoint newPoint);
+        void onNewPoint(MapPoint newPoint);
 
         void onNewPointList(List<MapPoint> list);
 
