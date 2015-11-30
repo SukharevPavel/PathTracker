@@ -63,6 +63,11 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     public void reloadList() {
         Log.i(TAG, "reload");
+        final Loader loader = getLoaderManager().getLoader(PATH_LOADER_ID);
+        if (loader != null && loader.isReset()) {
+            Log.i(TAG, "restart");
+            getLoaderManager().restartLoader(PATH_LOADER_ID, null, this);
+        }
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
     }
 

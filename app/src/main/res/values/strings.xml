@@ -8,6 +8,7 @@
     <string name="type_path_name">Type name of path</string>
     <string name="dialog_save">Save</string>
     <string name="dialog_cancel">Cancel</string>
+    <string name="path_name_hint">Path-</string>
 
     <string name="dialog_is_really_clear">Do you really want to clear current path?</string>
     <string name="dialog_yes">Yes</string>

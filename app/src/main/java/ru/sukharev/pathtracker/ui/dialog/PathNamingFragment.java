@@ -10,6 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import ru.sukharev.pathtracker.R;
 
 /**
@@ -19,6 +22,7 @@ public class PathNamingFragment extends DialogFragment {
 
     private DialogPathNamingListener mListener;
     private EditText mEditText;
+    private SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
 
     public PathNamingFragment() {
 
@@ -33,13 +37,19 @@ public class PathNamingFragment extends DialogFragment {
         mListener = (DialogPathNamingListener) getActivity();
         mEditText = (EditText) view.findViewById(R.id.edit_path_name);
 
+        final String defaultName = getString(R.string.path_name_hint) +
+                format.format(new Date(System.currentTimeMillis()));
+        mEditText.setHint(defaultName);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view);
         builder.setPositiveButton(getString(R.string.dialog_save),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mListener.onGetName(String.valueOf(mEditText.getText()));
+                        String name = String.valueOf(mEditText.getText());
+                        if (name.isEmpty()) name = defaultName;
+                        mListener.onGetName(name);
                     }
                 });
         builder.setNegativeButton(getString(R.string.dialog_cancel), null);

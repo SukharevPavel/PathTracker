@@ -292,8 +292,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
-    public void onError(SQLException e) {
-        Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_LONG).show();
+    public void onError(Exception e) {
+        Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_SHORT).show();
         e.printStackTrace();
     }
 
@@ -304,6 +304,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onFail() {
-        Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_SHORT).show();
     }
 }

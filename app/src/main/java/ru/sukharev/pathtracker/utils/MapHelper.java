@@ -27,8 +27,8 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         com.google.android.gms.location.LocationListener {
 
     private static final String TAG = "MapHelper.java";
+    private final List<MapPoint> mPoints;
     private Context mContext;
-    private List<MapPoint> mPoints;
     private boolean isServiceStarted = false;
     private MapHelperListener mListener;
     private SQLInteractionListener mSQLListener;
@@ -110,10 +110,16 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     }
 
     public void getList() {
-        if (mPoints != null && mListener != null)
+        if (mListener != null)
             mListener.onNewPointList(mPoints);
     }
 
+
+    private void addPoint(MapPoint point) {
+        synchronized (mPoints) {
+            mPoints.add(point);
+        }
+    }
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -128,7 +134,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         else mListener.onNewPoint(newMapPoint);
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
-        mPoints.add(newMapPoint);
+        addPoint(newMapPoint);
     }
 
     @Override
@@ -141,7 +147,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     public void onLocationChanged(Location location) {
         MapPoint newMapPoint = new MapPoint(location);
         mListener.onNewPoint(newMapPoint);
-        mPoints.add(newMapPoint);
+        addPoint(newMapPoint);
     }
 
 
@@ -164,7 +170,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     public interface SQLInteractionListener {
 
-        void onError(SQLException e);
+        void onError(Exception e);
 
         void onSuccess();
 
@@ -172,10 +178,15 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     }
 
-    private class AsynkSaveToDatabaseTask extends AsyncTask<String, Void, Void> {
+    private class AsynkSaveToDatabaseTask extends AsyncTask<String, Void, Integer> {
+
+        private final static int SUCCESS = 0;
+        private final static int FAIL = 1;
+        private final static int ERROR = 2;
+        private Exception mException;
 
         @Override
-        protected Void doInBackground(String... params) {
+        protected Integer doInBackground(String... params) {
             String name = params[0];
             if (!mPoints.isEmpty()) {
                 try {
@@ -186,15 +197,31 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
                     mDatabaseHelper.getPathDAO().create(mapPath);
                     saveAllPoints();
                 } catch (SQLException e) {
-                    mSQLListener.onError(e);
+                    mException = e;
+                    return ERROR;
                 }
-                mSQLListener.onSuccess();
-                return null;
+                return SUCCESS;
             }
-            mSQLListener.onFail();
-            return null;
+            return FAIL;
         }
 
+        @Override
+        protected void onPostExecute(Integer result) {
+            super.onPostExecute(result);
+            switch (result) {
+                case SUCCESS:
+                    mSQLListener.onSuccess();
+                    break;
+                case FAIL:
+                    mSQLListener.onFail();
+                    break;
+                case ERROR:
+                    if (mException != null) mSQLListener.onError(mException);
+                    break;
+                default:
+                    break;
+            }
+        }
 
         private void setPathToPoints(MapPath mapPath) {
             for (MapPoint mapPoint : mPoints)
@@ -203,8 +230,10 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
         private void saveAllPoints() throws SQLException {
             DatabaseHelper.PointDAO dao = mDatabaseHelper.getPointDAO();
-            for (MapPoint mapPoint : mPoints)
-                dao.create(mapPoint);
+            synchronized (mPoints) {
+                for (MapPoint mapPoint : mPoints)
+                    dao.create(mapPoint);
+            }
         }
     }
 
