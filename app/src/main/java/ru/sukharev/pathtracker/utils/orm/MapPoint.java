@@ -17,6 +17,7 @@ public class MapPoint {
     public final static String COLUMN_X = "loc_lat";
     public final static String COLUMN_Y = "loc_long";
     public final static String COLUMN_DATE = "date";
+    public final static String COLUMN_SPEED = "speed";
     @DatabaseField(foreign = true)
     MapPath path;
     @DatabaseField(generatedId = true)
@@ -27,6 +28,8 @@ public class MapPoint {
     private double longitude;
     @DatabaseField(canBeNull = false, dataType = DataType.LONG, columnName = COLUMN_DATE)
     private long time;
+    @DatabaseField(dataType = DataType.DOUBLE, columnName = COLUMN_SPEED)
+    private double speed;
 
     public MapPoint(double loc_x, double loc_y, long time) {
         this.lattitude = loc_x;
@@ -37,11 +40,23 @@ public class MapPoint {
     }
 
     public MapPoint(Location loc) {
+        this.lattitude = loc.getLatitude();
 
+        this.longitude = loc.getLongitude();
+        this.time = loc.getTime();
+        if (loc.hasSpeed()) this.speed = loc.getSpeed();
     }
 
     MapPoint() {
 
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
     }
 
     public LatLng toLatLng() {

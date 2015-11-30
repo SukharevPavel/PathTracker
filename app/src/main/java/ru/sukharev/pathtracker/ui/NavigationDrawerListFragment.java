@@ -9,6 +9,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -35,8 +36,8 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     public final static int NO_SELECTION = -1;
     private final static int PATH_LOADER_ID = 1;
+    private final static String TAG = "NavigationDrawer.java";
     private PathAdapter mAdapter;
-
     private View mDrawerView;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -61,6 +62,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     }
 
     public void reloadList() {
+        Log.i(TAG, "reload");
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
     }
 
@@ -145,8 +147,11 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     @Override
     public void onLoadFinished(Loader loader, Object data) {
-        if (mAdapter != null)
+        Log.i(TAG, "on load finished");
+        if (mAdapter != null) {
+            Log.i(TAG, "replace list");
             mAdapter.replaceList((List<MapPath>) data);
+        }
     }
 
     @Override

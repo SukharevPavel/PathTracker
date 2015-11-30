@@ -1,11 +1,12 @@
 package ru.sukharev.pathtracker.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -23,13 +24,14 @@ import ru.sukharev.pathtracker.utils.orm.MapPoint;
  * and model: Service (@link ru,sukharev.pathtracker.service.TrackingService} and Content Provider
  */
 public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
+        com.google.android.gms.location.LocationListener {
 
     private static final String TAG = "MapHelper.java";
     private Context mContext;
     private List<MapPoint> mPoints;
     private boolean isServiceStarted = false;
     private MapHelperListener mListener;
+    private SQLInteractionListener mSQLListener;
     private DatabaseHelper mDatabaseHelper;
     private LocationRequest mLocationRequest;
 
@@ -47,7 +49,6 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     private void configureGoogleApiClient() {
         GoogleApiClient.Builder builder = new GoogleApiClient.Builder(mContext)
                 .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API);
         mGoogleApiClient = builder.build();
     }
@@ -60,8 +61,17 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         mListener.onServiceStop();
     }
 
-    public void setListeners(MapHelperListener listener) {
-        mListener = listener;
+    public void setListeners(Activity activity) {
+        try {
+            mListener = (MapHelperListener) activity;
+        } catch (ClassCastException e) {
+            mListener = null;
+        }
+        try {
+            mSQLListener = (SQLInteractionListener) activity;
+        } catch (ClassCastException e) {
+            mSQLListener = null;
+        }
     }
 
     public void startService() {
@@ -91,32 +101,8 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         mPoints.clear();
     }
 
-
-
-    public boolean saveToDatabase(String name) throws SQLException {
-        //T0D0 background, to notify Drawer after inserting
-        if (!mPoints.isEmpty()) {
-            MapPath mapPath = new MapPath(name,
-                    mPoints.get(0).getTime(),
-                    mPoints.get(mPoints.size()-1).getTime());
-            setPathToPoints(mapPath);
-            mDatabaseHelper.getPathDAO().create(mapPath);
-            saveAllPoints();
-            return true;
-
-        }
-        return false;
-    }
-
-    private void setPathToPoints(MapPath mapPath){
-        for (MapPoint mapPoint : mPoints)
-                mapPoint.setPath(mapPath);
-    }
-
-    private void saveAllPoints() throws SQLException {
-        DatabaseHelper.PointDAO dao = mDatabaseHelper.getPointDAO();
-        for (MapPoint mapPoint : mPoints)
-            dao.create(mapPoint);
+    public void saveToDatabase(String name) {
+        new AsynkSaveToDatabaseTask().execute(name);
     }
 
     public boolean isServiceStarted() {
@@ -135,7 +121,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         mListener.onServiceStart();
         Location point = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
-        MapPoint newMapPoint = new MapPoint(point.getLatitude(), point.getLongitude(), point.getTime());
+        MapPoint newMapPoint = new MapPoint(point);
 
         //Checking if we start a new tracking on just a resume previous
         if (mPoints.isEmpty()) mListener.onStartPoint(newMapPoint);
@@ -150,16 +136,10 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         stopTracking();
     }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
 
     @Override
     public void onLocationChanged(Location location) {
-        Location point = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        MapPoint newMapPoint = new MapPoint(point.getLatitude(), point.getLongitude(), point.getTime());
+        MapPoint newMapPoint = new MapPoint(location);
         mListener.onNewPoint(newMapPoint);
         mPoints.add(newMapPoint);
     }
@@ -180,6 +160,52 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
         void onEndPoint(MapPoint endPoint);
 
+    }
+
+    public interface SQLInteractionListener {
+
+        void onError(SQLException e);
+
+        void onSuccess();
+
+        void onFail();
+
+    }
+
+    private class AsynkSaveToDatabaseTask extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            String name = params[0];
+            if (!mPoints.isEmpty()) {
+                try {
+                    MapPath mapPath = new MapPath(name,
+                            mPoints.get(0).getTime(),
+                            mPoints.get(mPoints.size() - 1).getTime());
+                    setPathToPoints(mapPath);
+                    mDatabaseHelper.getPathDAO().create(mapPath);
+                    saveAllPoints();
+                } catch (SQLException e) {
+                    mSQLListener.onError(e);
+                }
+                mSQLListener.onSuccess();
+                return null;
+            }
+            mSQLListener.onFail();
+            return null;
+        }
+
+
+        private void setPathToPoints(MapPath mapPath) {
+            for (MapPoint mapPoint : mPoints)
+                mapPoint.setPath(mapPath);
+        }
+
+        private void saveAllPoints() throws SQLException {
+            DatabaseHelper.PointDAO dao = mDatabaseHelper.getPointDAO();
+            for (MapPoint mapPoint : mPoints)
+                dao.create(mapPoint);
+        }
     }
 
 

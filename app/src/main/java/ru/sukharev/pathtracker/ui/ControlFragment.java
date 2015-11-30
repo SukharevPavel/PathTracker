@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import java.sql.SQLException;
-
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
 
@@ -72,7 +70,7 @@ public class ControlFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_control, container, false);
         mListener = (ControlFragmentListener) getActivity();
-        mHelper.setListeners((MapHelper.MapHelperListener) getActivity());
+        mHelper.setListeners(getActivity());
 
         mControlButton = (Button) view.findViewById(R.id.button_control_service);
         mControlButton.setOnClickListener(mButtonListener);
@@ -102,8 +100,8 @@ public class ControlFragment extends Fragment {
         if (mControlButton!= null) mControlButton.setText(text);
     }
 
-    public boolean saveToDatabase(String name) throws SQLException {
-        return mHelper.saveToDatabase(name);
+    public void saveToDatabase(String name) {
+        mHelper.saveToDatabase(name);
     }
 
     public void clearData(){

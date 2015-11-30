@@ -36,8 +36,9 @@ import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener,
-        PathNamingFragment.DialogPathNamingListener, NavigationDrawerListFragment.PathItemClickListener,
-        ControlFragment.ControlFragmentListener, ClearDialogFragment.DialogClearListener {
+        MapHelper.SQLInteractionListener, PathNamingFragment.DialogPathNamingListener,
+        NavigationDrawerListFragment.PathItemClickListener, ControlFragment.ControlFragmentListener,
+        ClearDialogFragment.DialogClearListener {
 
     private final static String TAG = "MapActivity.java";
 
@@ -249,13 +250,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onGetName(String name) {
-        try {
-            if (!mControlFragment.saveToDatabase(name)) Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_LONG).show();
-            else mNavigationDrawerFragment.reloadList();
-        } catch (SQLException e) {
-            Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
+        mControlFragment.saveToDatabase(name);
     }
 
     @Override
@@ -294,5 +289,21 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onClear() {
         clearMap();
         mControlFragment.clearData();
+    }
+
+    @Override
+    public void onError(SQLException e) {
+        Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_LONG).show();
+        e.printStackTrace();
+    }
+
+    @Override
+    public void onSuccess() {
+        mNavigationDrawerFragment.reloadList();
+    }
+
+    @Override
+    public void onFail() {
+        Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_LONG).show();
     }
 }
