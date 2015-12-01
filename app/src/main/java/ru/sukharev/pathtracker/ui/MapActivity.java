@@ -23,9 +23,9 @@ import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.ForeignCollection;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import ru.sukharev.pathtracker.R;
@@ -76,9 +76,9 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         super.onResume();
     }
 
-    private void checkPermission(){
+    private void checkPermission() {
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-                requestLocationPermission();
+            requestLocationPermission();
     }
 
     private void requestLocationPermission() {
@@ -117,17 +117,17 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         }
     }
 
-    private void showPathNamingFragment(){
+    private void showPathNamingFragment() {
         PathNamingFragment fragment = new PathNamingFragment();
         fragment.show(getSupportFragmentManager(), PATH_NAMING_FRAGMENT_TAG);
     }
 
-    private void showClearFragment(){
+    private void showClearFragment() {
         ClearDialogFragment fragment = new ClearDialogFragment();
         fragment.show(getSupportFragmentManager(), CLEAR_FRAGMENT_TAG);
     }
 
-    private void clearMap(){
+    private void clearMap() {
         if (mMap != null) {
             mMap.clear();
             removePolyline();
@@ -186,7 +186,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     private void addListOfPoints(Iterator<MapPoint> iterator) {
-        LinkedList<LatLng> newList = new LinkedList<>();
+        List<LatLng> newList = new ArrayList<>();
         while (iterator.hasNext())
             newList.add(iterator.next().toLatLng());
         updatePolyline(newList);
@@ -276,7 +276,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
-    public void onSaveButtonClick(){
+    public void onSaveButtonClick() {
         showPathNamingFragment();
     }
 

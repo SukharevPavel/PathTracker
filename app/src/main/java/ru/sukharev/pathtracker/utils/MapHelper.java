@@ -12,8 +12,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
@@ -38,10 +38,9 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     private GoogleApiClient mGoogleApiClient;
 
 
-
     public MapHelper(@NonNull Context ctx) {
         mContext = ctx;
-        mPoints = new LinkedList<>();
+        mPoints = new CopyOnWriteArrayList<>();
         mDatabaseHelper = DatabaseHelper.getInstance(ctx);
         configureGoogleApiClient();
     }
@@ -54,7 +53,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     }
 
 
-    private void stopTracking(){
+    private void stopTracking() {
         isServiceStarted = false;
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
@@ -97,7 +96,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
             mGoogleApiClient.disconnect();
     }
 
-    public void clearData(){
+    public void clearData() {
         mPoints.clear();
     }
 
@@ -116,9 +115,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
 
     private void addPoint(MapPoint point) {
-        synchronized (mPoints) {
-            mPoints.add(point);
-        }
+        mPoints.add(point);
     }
 
     @Override
@@ -149,7 +146,6 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         mListener.onNewPoint(newMapPoint);
         addPoint(newMapPoint);
     }
-
 
 
     public interface MapHelperListener {
@@ -230,10 +226,8 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
         private void saveAllPoints() throws SQLException {
             DatabaseHelper.PointDAO dao = mDatabaseHelper.getPointDAO();
-            synchronized (mPoints) {
-                for (MapPoint mapPoint : mPoints)
-                    dao.create(mapPoint);
-            }
+            for (MapPoint mapPoint : mPoints)
+                dao.create(mapPoint);
         }
     }
 

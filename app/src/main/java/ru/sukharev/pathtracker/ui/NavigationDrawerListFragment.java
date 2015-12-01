@@ -30,7 +30,7 @@ import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.OrmLoader;
 
 /**
- * NavigationDrawer taht shows the list of saved path and allows to interact with them
+ * NavigationDrawer that shows the list of saved path and allows to interact with them
  */
 public class NavigationDrawerListFragment extends ListFragment implements LoaderManager.LoaderCallbacks {
 
@@ -56,7 +56,6 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     };
 
 
-
     public NavigationDrawerListFragment() {
         // Required empty public constructor
     }
@@ -71,29 +70,29 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(PATH_LOADER_ID, null, this);
         mAdapter = new PathAdapter(getContext(),
                 R.layout.navigation_drawer_list_item,
                 new ArrayList<MapPath>());
-        setListAdapter(mAdapter);
-        setRetainInstance(true);
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        getLoaderManager().initLoader(PATH_LOADER_ID, null, this);
 
+        setListAdapter(mAdapter);
         return inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        setRetainInstance(true);
         registerForContextMenu(getListView());
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
         mPathListener = (PathItemClickListener) getActivity();
@@ -217,17 +216,17 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     }
 
 
-    public static class PathAdapter extends ArrayAdapter<MapPath>{
+    public static class PathAdapter extends ArrayAdapter<MapPath> {
 
         private int mResource;
 
 
-        public PathAdapter(Context context, int resource,  List<MapPath> objects) {
+        public PathAdapter(Context context, int resource, List<MapPath> objects) {
             super(context, resource, objects);
             mResource = resource;
         }
 
-        public void replaceList(List<MapPath> newList){
+        public void replaceList(List<MapPath> newList) {
             //T0D0 can be done faster, if check equality of lists
             clear();
             for (MapPath path : newList)
@@ -252,7 +251,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
             return convertView;
         }
 
-        public static class ViewHolder{
+        public static class ViewHolder {
             TextView name;
             TextView startTime;
             TextView endTime;
