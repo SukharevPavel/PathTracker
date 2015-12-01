@@ -114,8 +114,14 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     }
 
 
-    private void addPoint(MapPoint point) {
+    private void addPointToList(MapPoint point) {
         mPoints.add(point);
+    }
+
+
+    private void notifyUI(MapPoint newMapPoint) {
+        if (mPoints.isEmpty()) mListener.onStartPoint(newMapPoint);
+        else mListener.onNewPoint(newMapPoint);
     }
 
     @Override
@@ -127,11 +133,11 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         MapPoint newMapPoint = new MapPoint(point);
 
         //Checking if we start a new tracking on just a resume previous
-        if (mPoints.isEmpty()) mListener.onStartPoint(newMapPoint);
-        else mListener.onNewPoint(newMapPoint);
+
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
-        addPoint(newMapPoint);
+        notifyUI(newMapPoint);
+        addPointToList(newMapPoint);
     }
 
     @Override
@@ -143,8 +149,8 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     @Override
     public void onLocationChanged(Location location) {
         MapPoint newMapPoint = new MapPoint(location);
-        mListener.onNewPoint(newMapPoint);
-        addPoint(newMapPoint);
+        notifyUI(newMapPoint);
+        addPointToList(newMapPoint);
     }
 
 

@@ -32,6 +32,7 @@ import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.ui.dialog.ClearDialogFragment;
 import ru.sukharev.pathtracker.ui.dialog.PathNamingFragment;
 import ru.sukharev.pathtracker.utils.MapHelper;
+import ru.sukharev.pathtracker.utils.PathInfo;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
@@ -50,6 +51,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private NavigationDrawerListFragment mNavigationDrawerFragment;
     private Toolbar mToolbar;
     private Polyline mPolyline;
+    private PathInfo mPathInfo;
 
     private boolean isShowingSaved;
 
@@ -132,6 +134,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             mMap.clear();
             removePolyline();
         }
+        if (mPathInfo != null)
+            mPathInfo = null;
     }
 
     /**
@@ -180,16 +184,25 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     }
 
+    private void initPathInfo(List<MapPoint> list) {
+        mPathInfo = new PathInfo(list);
+    }
+
+    private void addPointsToPathInfo(List<MapPoint> list) {
+        mPathInfo.addPointInfo(list);
+    }
 
     private void addOnePoint(MapPoint newPoint) {
+        addPointsToPathInfo(Collections.singletonList(newPoint));
         updatePolyline(Collections.singletonList(newPoint.toLatLng()));
     }
 
-    private void addListOfPoints(Iterator<MapPoint> iterator) {
-        List<LatLng> newList = new ArrayList<>();
-        while (iterator.hasNext())
-            newList.add(iterator.next().toLatLng());
-        updatePolyline(newList);
+
+    private void addListOfPoints(List<MapPoint> pointList) {
+        List<LatLng> latlngList = new ArrayList<>();
+        for (MapPoint point : pointList)
+            latlngList.add(point.toLatLng());
+        updatePolyline(latlngList);
     }
 
     private void setNewPoint(MapPoint newPoint) {
@@ -210,26 +223,36 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private void setNewMapPoints(Iterator<MapPoint> iterator) {
         setUpMapIfNeeded();
         clearMap();
-        MapPoint newPoint;
-        if (iterator.hasNext()) {
-            newPoint = iterator.next();
-            setStartPoint(newPoint);
-            addListOfPoints(iterator);
+        List<MapPoint> points = new ArrayList<>();
+        while (iterator.hasNext()) {
+            points.add(iterator.next());
+        }
+        if (!points.isEmpty()) {
+            initPathInfo(points);
+            setStartPoint(points.get(0));
+            addListOfPoints(points);
         }
     }
 
     @Override
     public void onStartPoint(MapPoint startPoint) {
-        if (!isShowingSaved) setStartPoint(startPoint);
+        if (!isShowingSaved) {
+            setUpMapIfNeeded();
+            clearMap();
+            initPathInfo(Collections.singletonList(startPoint));
+            setStartPoint(startPoint);
+        }
     }
 
     private void setStartPoint(MapPoint startPoint) {
-        setUpMapIfNeeded();
-        clearMap();
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()))
                 .title("Start"));
         addOnePoint(startPoint);
+    }
+
+    private void drawMarker(MapPoint point) {
+
     }
 
     private void enableWatchingSavedPathMode() {
@@ -266,7 +289,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
                 e.printStackTrace();
             }
         }
-
         enableWatchingSavedPathMode();
     }
 
