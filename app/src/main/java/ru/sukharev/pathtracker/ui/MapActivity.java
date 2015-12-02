@@ -147,12 +147,12 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onServiceStart() {
-        mControlFragment.changeButtonText(getString(R.string.button_stop_service));
+        mControlFragment.changeButtonIcon(true);
     }
 
     @Override
     public void onServiceStop() {
-        mControlFragment.changeButtonText(getString(R.string.button_start_service));
+        mControlFragment.changeButtonIcon(false);
         //askForNameToSave();
     }
 

@@ -13,16 +13,22 @@
         <include android:id="@+id/toolbar"
             layout="@layout/toolbar" />
 
-        <fragment  android:layout_width="match_parent"
-            android:layout_below="@id/toolbar"
-            android:layout_height="match_parent" android:id="@+id/map_fragment" tools:context=".MapActivity"
+            <fragment
+                android:id="@+id/map_fragment"
             android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_above="@+id/control_fragment"/>
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/toolbar"
+                tools:context=".MapActivity" />
 
-        <fragment  android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@id/control_fragment" tools:context=".MapActivity"
-            android:name="ru.sukharev.pathtracker.ui.ControlFragment"
-            android:layout_alignParentBottom="true"/>
+            <fragment
+                android:id="@+id/control_fragment"
+                android:name="ru.sukharev.pathtracker.ui.ControlFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                tools:context=".MapActivity" />
         </RelativeLayout>
 
         <fragment android:id="@+id/navigation_drawer_list_fragment"
