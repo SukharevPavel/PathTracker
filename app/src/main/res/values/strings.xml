@@ -27,4 +27,5 @@
     <string name="context_menu_delete_item">Delete path</string>
     <string name="error_delete_path">Failed to delete path</string>
 
+
 </resources>

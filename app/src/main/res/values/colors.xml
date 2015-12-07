@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="red_lt">#88cc0000</color>
+    <color name="half_transparent">#200040f0</color>
+    <color name="app_color">#4080D0</color>
+    <color name="app_color_lt">#60A0F0</color>
+    <color name="app_color_dark">#2060A0</color>
 </resources>

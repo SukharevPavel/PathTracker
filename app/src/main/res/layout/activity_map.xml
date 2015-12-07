@@ -20,7 +20,6 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/toolbar"
                 tools:context=".MapActivity" />
-
             <fragment
                 android:id="@+id/control_fragment"
                 android:name="ru.sukharev.pathtracker.ui.ControlFragment"

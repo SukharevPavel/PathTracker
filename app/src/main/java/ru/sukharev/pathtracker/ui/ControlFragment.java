@@ -99,8 +99,8 @@ public class ControlFragment extends Fragment {
 
     public void changeButtonIcon(boolean isStart) {
         if (mControlButton != null) {
-            if (isStart) mControlButton.setImageResource(R.drawable.ic_pause);
-            else mControlButton.setImageResource(R.drawable.ic_start);
+            if (isStart) mControlButton.setImageResource(R.drawable.pause_circle);
+            else mControlButton.setImageResource(R.drawable.play_circle);
         }
     }
 

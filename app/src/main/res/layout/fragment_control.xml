@@ -3,32 +3,45 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:background="@color/half_transparent"
     tools:context="ru.sukharev.pathtracker.ui.ControlFragment">
 
     <ImageButton
         android:id="@+id/button_control_service"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/ic_start" />
+        android:background="@android:color/transparent"
+        android:src="@drawable/play_circle" />
 
 
     <ImageButton
         android:id="@+id/button_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/ic_save" />
+        android:background="@android:color/transparent"
+        android:src="@drawable/content_save" />
 
     <ImageButton
         android:id="@+id/button_show_current"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/ic_watch"
+        android:src="@drawable/eye"
+        android:background="@android:color/transparent"
         android:visibility="invisible" />
 
     <ImageButton
         android:id="@+id/button_clear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/ic_clear" />
+        android:background="@android:color/transparent"
+        android:src="@drawable/delete" />
+
+    <ImageButton
+        android:id="@+id/button_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:src="@drawable/information" />
+
 
 </LinearLayout>
