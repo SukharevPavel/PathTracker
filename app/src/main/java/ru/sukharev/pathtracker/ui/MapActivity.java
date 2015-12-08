@@ -7,10 +7,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -45,6 +47,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     private final static String PATH_NAMING_FRAGMENT_TAG = "path_naming_fragment";
     private final static String CLEAR_FRAGMENT_TAG = "clear_fragment";
+    private final static String INFO_FRAGMENT_TAG = "info_fragment";
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ControlFragment mControlFragment;
@@ -54,6 +57,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private PathInfo mPathInfo;
 
     private boolean isShowingSaved;
+    private InfoFragment mInfoFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +72,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
                 mToolbar, R.id.navigation_drawer_list_fragment);
         mControlFragment = (ControlFragment) getSupportFragmentManager().
                 findFragmentById(R.id.control_fragment);
+        mInfoFragment = (InfoFragment) getSupportFragmentManager().findFragmentByTag(INFO_FRAGMENT_TAG);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             checkPermission();
     }
@@ -194,14 +199,23 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     private void addOnePoint(MapPoint newPoint) {
         addPointsToPathInfo(Collections.singletonList(newPoint));
+        updateInfoFragmentIfExists();
         updatePolyline(Collections.singletonList(newPoint.toLatLng()));
     }
 
+    private void updateInfoFragmentIfExists(){
+        if (mInfoFragment != null) mInfoFragment.updateFields(mPathInfo.getStartTime(),
+                mPathInfo.getCurTime(), mPathInfo.getDistance(), mPathInfo.getCurSpeed(),
+                mPathInfo.getAvgSpeed());
+    }
 
     private void addListOfPoints(List<MapPoint> pointList) {
         List<LatLng> latlngList = new ArrayList<>();
-        for (MapPoint point : pointList)
+        for (MapPoint point : pointList) {
+            Log.i(TAG,"timestamp:"+point.getTime());
             latlngList.add(point.toLatLng());
+        }
+        updateInfoFragmentIfExists();
         updatePolyline(latlngList);
     }
 
@@ -248,12 +262,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()))
                 .title("Start"));
-        addOnePoint(startPoint);
     }
 
-    private void drawMarker(MapPoint point) {
-
-    }
 
     private void enableWatchingSavedPathMode() {
         isShowingSaved = true;
@@ -264,6 +274,34 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         isShowingSaved = false;
         mControlFragment.showCurrentPathButton(false);
         mNavigationDrawerFragment.invalidateSelection();
+    }
+
+
+    private void switchInfoFragment(){
+        if (mInfoFragment == null) {
+            mInfoFragment = new InfoFragment();
+            if (mPathInfo != null) {
+                Bundle bundle = new Bundle();
+                bundle.putLong(InfoFragment.ARG_CUR_TIME, mPathInfo.getCurTime());
+                bundle.putLong(InfoFragment.ARG_START_TIME, mPathInfo.getStartTime());
+                bundle.putDouble(InfoFragment.ARG_CUR_SPEED, mPathInfo.getCurSpeed());
+                bundle.putDouble(InfoFragment.ARG_AVG_SPEED, mPathInfo.getAvgSpeed());
+                bundle.putDouble(InfoFragment.ARG_DISTANCE, mPathInfo.getDistance());
+                mInfoFragment.setArguments(bundle);
+            }
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.info_fragment, mInfoFragment, INFO_FRAGMENT_TAG)
+                    .commit();
+        }
+        else {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(mInfoFragment)
+                    .commit();
+            mInfoFragment = null;
+        }
+
     }
 
     @Override
@@ -305,6 +343,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     @Override
     public void onClearButtonClick() {
         showClearFragment();
+    }
+
+    @Override
+    public void onInfoButtonListener() {
+        switchInfoFragment();
     }
 
     @Override

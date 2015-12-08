@@ -31,6 +31,7 @@ public class ControlFragment extends Fragment {
     private ImageButton mCurrentPathButton;
     private ImageButton mSaveButton;
     private ImageButton mClearButton;
+    private ImageButton mInfoButton;
     private ControlFragmentListener mListener;
     private final View.OnClickListener mCurrentButtonListener = new View.OnClickListener() {
         @Override
@@ -51,6 +52,12 @@ public class ControlFragment extends Fragment {
         public void onClick(View v) {
             mListener.onClearButtonClick();
             if (mHelper.isServiceStarted()) mHelper.clearData();
+        }
+    };
+    private final View.OnClickListener mInfoButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mListener.onInfoButtonListener();
         }
     };
 
@@ -85,6 +92,8 @@ public class ControlFragment extends Fragment {
         mSaveButton = (ImageButton) view.findViewById(R.id.button_save);
         mSaveButton.setOnClickListener(mSaveButtonListener);
 
+        mInfoButton = (ImageButton) view.findViewById(R.id.button_info);
+        mInfoButton.setOnClickListener(mInfoButtonListener);
 
         changeButtonIcon(mHelper.isServiceStarted());
         mHelper.getList();
@@ -119,6 +128,8 @@ public class ControlFragment extends Fragment {
         void onSaveButtonClick();
 
         void onClearButtonClick();
+
+        void onInfoButtonListener();
 
     }
 

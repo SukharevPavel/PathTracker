@@ -11,6 +11,7 @@
 
     <style name="app_action_bar" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/app_color</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
         <item name="titleTextStyle">@style/app_action_bar_title_text</item>
     </style>
 

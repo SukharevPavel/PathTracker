@@ -4,7 +4,7 @@
     android:background="@color/app_color_lt"
     tools:context="ru.sukharev.pathtracker.ui.NavigationDrawerListFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <!-- TODO: make a header -->
     <TextView
         android:id="@android:id/empty"
         android:text="@string/list_is_empty"
