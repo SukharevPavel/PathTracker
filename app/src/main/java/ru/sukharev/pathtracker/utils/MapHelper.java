@@ -128,16 +128,16 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     public void onConnected(Bundle bundle) {
         isServiceStarted = true;
         mListener.onServiceStart();
-        Location point = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        MapPoint newMapPoint = new MapPoint(point);
+      /*  Location point = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);*/
+        //  MapPoint newMapPoint = new MapPoint(point);
 
         //Checking if we start a new tracking on just a resume previous
 
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
-        notifyUI(newMapPoint);
-        addPointToList(newMapPoint);
+        // notifyUI(newMapPoint);
+        // addPointToList(newMapPoint);
     }
 
     @Override

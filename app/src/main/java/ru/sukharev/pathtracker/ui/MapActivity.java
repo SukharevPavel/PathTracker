@@ -2,17 +2,21 @@ package ru.sukharev.pathtracker.ui;
 
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -63,24 +67,52 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
         setUpMapIfNeeded();
+
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
-        mNavigationDrawerFragment = (NavigationDrawerListFragment) getSupportFragmentManager().
-                findFragmentById(R.id.navigation_drawer_list_fragment);
-        mNavigationDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout),
-                mToolbar, R.id.navigation_drawer_list_fragment);
-        mControlFragment = (ControlFragment) getSupportFragmentManager().
-                findFragmentById(R.id.control_fragment);
-        mInfoFragment = (InfoFragment) getSupportFragmentManager().findFragmentByTag(INFO_FRAGMENT_TAG);
+
+        setUpFragments();
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             checkPermission();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_map_toolbar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_settings) {
+            Intent intent = new Intent(MapActivity.this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onResume() {
         setUpMapIfNeeded();
         super.onResume();
+    }
+
+
+    private void setUpFragments() {
+        mNavigationDrawerFragment = (NavigationDrawerListFragment) getSupportFragmentManager().
+                findFragmentById(R.id.navigation_drawer_list_fragment);
+        mNavigationDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout),
+                mToolbar, R.id.navigation_drawer_list_fragment);
+
+        mControlFragment = (ControlFragment) getSupportFragmentManager().
+                findFragmentById(R.id.control_fragment);
+
+        mInfoFragment = (InfoFragment) getSupportFragmentManager().findFragmentByTag(INFO_FRAGMENT_TAG);
     }
 
     private void checkPermission() {
@@ -121,7 +153,18 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         if (mMap == null) {
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment))
                     .getMap();
+            setMapType();
+
+
         }
+    }
+
+    private void setMapType() {
+        int mapType = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this)
+                .getString(getString(R.string.pref_key_map_type),
+                        getString(R.string.pref_key_map_type_def_result)));
+        mMap.setMapType(mapType);
+
     }
 
     private void showPathNamingFragment() {
@@ -143,12 +186,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             mPathInfo = null;
     }
 
-    /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p/>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
-     */
 
     @Override
     public void onServiceStart() {

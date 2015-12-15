@@ -1,7 +1,5 @@
 package ru.sukharev.pathtracker.ui;
 
-import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -10,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -18,6 +15,8 @@ import ru.sukharev.pathtracker.R;
 
 
 public class InfoFragment extends Fragment {
+
+    public final static String TAG = "InfoFragment.java";
 
     public final static String ARG_START_TIME = "start_time";
     public final static String ARG_CUR_TIME = "cur_time";
@@ -55,6 +54,7 @@ public class InfoFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_info, container, false);
 
+
         mTimeText = (TextView) v.findViewById(R.id.info_timer);
         mDistText = (TextView) v.findViewById(R.id.info_dist);
         mSpeedText = (TextView) v.findViewById(R.id.info_cur_speed);
@@ -63,9 +63,11 @@ public class InfoFragment extends Fragment {
         return v;
     }
 
+
     private void initFields(){
         Bundle bundle = getArguments();
         if (bundle != null) {
+            Log.i(TAG, "init");
             startTime = bundle.getLong(ARG_START_TIME);
             curTime = bundle.getLong(ARG_CUR_TIME);
             dist = bundle.getDouble(ARG_DISTANCE);
@@ -79,10 +81,14 @@ public class InfoFragment extends Fragment {
         mDistText.setText(String.valueOf(dist));
         mSpeedText.setText(String.valueOf(curSpeed));
         mAvgSpeedText.setText(String.valueOf(avgSpeed));
+
     }
 
     public void updateFields(long startTime, long curTime, double dist, double curSpeed,
                               double avgSpeed){
+        Log.i(TAG, "update");
+        Log.i(TAG, "start time = " + startTime + "\n curTime = " + curTime);
+        Log.i(TAG, "start time = " + format.format(new Date(startTime)) + "\n curTime = " + format.format(new Date(curTime)));
         this.startTime = startTime;
         this.curTime = curTime;
         this.dist = dist;

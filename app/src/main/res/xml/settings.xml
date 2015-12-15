@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/map_settings">
+        <ListPreference
+            android:defaultValue="@string/pref_key_map_type_def_result"
+            android:dialogTitle="@string/pref_map_type_dialog"
+            android:entries="@array/array_map_types"
+            android:entryValues="@array/array_map_types_results"
+            android:key="@string/pref_key_map_type"
+            android:summary="@string/pref_key_map_type_def"
+            android:title="@string/pref_map_type" />
+        <ListPreference
+            android:defaultValue="@string/pref_key_measure_interval_def"
+            android:dialogTitle="@string/pref_measure_interval_dialog"
+            android:entries="@array/array_measure_interval"
+            android:entryValues="@array/array_measure_interval"
+            android:key="@string/pref_key_measure_interval"
+            android:title="@string/pref_measure_interval" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

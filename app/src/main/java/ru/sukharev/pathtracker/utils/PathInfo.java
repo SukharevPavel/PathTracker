@@ -1,7 +1,6 @@
 package ru.sukharev.pathtracker.utils;
 
 import android.location.Location;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,16 +34,6 @@ public class PathInfo {
         }
     }
 
-    private double findDistance(MapPoint point1, MapPoint point2){
-        Location locationA = new Location(DUMMY_PROVIDER_A);
-        locationA.setLatitude(point1.getLattitude());
-        locationA.setLongitude(point1.getLongitude());
-        Location locationB = new Location(DUMMY_PROVIDER_B);
-        locationB.setLatitude(point2.getLattitude());
-        locationB.setLongitude(point2.getLongitude());
-        return locationA.distanceTo(locationB);
-    }
-
     public PathInfo(MapPoint point) {
         mPoints = new ArrayList<>();
         mPoints.add(point);
@@ -53,6 +42,16 @@ public class PathInfo {
         curSpeed = point.getSpeed();
         avgSpeed = point.getSpeed();
         mDistance = 0d;
+    }
+
+    private double findDistance(MapPoint point1, MapPoint point2) {
+        Location locationA = new Location(DUMMY_PROVIDER_A);
+        locationA.setLatitude(point1.getLattitude());
+        locationA.setLongitude(point1.getLongitude());
+        Location locationB = new Location(DUMMY_PROVIDER_B);
+        locationB.setLatitude(point2.getLattitude());
+        locationB.setLongitude(point2.getLongitude());
+        return locationA.distanceTo(locationB);
     }
 
     public void addPointInfo(List<MapPoint> list){

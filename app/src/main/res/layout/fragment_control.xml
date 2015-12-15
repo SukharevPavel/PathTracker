@@ -2,57 +2,57 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
     android:background="@android:color/transparent"
+    android:orientation="horizontal"
     tools:context="ru.sukharev.pathtracker.ui.ControlFragment">
 
     <ImageButton
         android:id="@+id/button_control_service"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/play_circle"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/desc_control_service"
-        android:background="?attr/selectableItemBackgroundBorderless"/>
+        android:src="@drawable/play_circle" />
 
 
     <ImageButton
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:id="@+id/button_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/content_save"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/desc_save_button"
-        android:background="?attr/selectableItemBackgroundBorderless"/>
+        android:src="@drawable/content_save" />
 
     <ImageButton
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:id="@+id/button_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/information"
-        android:contentDescription="@string/desc_path_info"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/desc_path_info"
+        android:src="@drawable/information"
          />
 
     <ImageButton
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:id="@+id/button_show_current"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/eye"
-        android:contentDescription="@string/desc_show_current"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/desc_show_current"
+        android:src="@drawable/eye"
         android:visibility="invisible" />
 
     <ImageButton
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:id="@+id/button_clear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/desc_clear_path"
         android:src="@drawable/delete" />

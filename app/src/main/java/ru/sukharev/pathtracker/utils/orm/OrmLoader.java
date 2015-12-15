@@ -1,27 +1,21 @@
 package ru.sukharev.pathtracker.utils.orm;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
-
-import com.j256.ormlite.table.DatabaseTable;
 
 import java.sql.SQLException;
 import java.util.List;
 
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
-import ru.sukharev.pathtracker.utils.orm.MapPath;
-import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 /**
  * Loader for asynchronous processing database query.
  */
 public class OrmLoader extends AsyncTaskLoader<List<?>> {
 
-    DatabaseHelper mHelper;
     public final static int GET_ALL_PATHS = 1;
     public final static int GET_POINT_BY_PATH = 2;
-
+    DatabaseHelper mHelper;
     private String mTable;
     private String mSelection;
     private String[] mSelectionArgs;
