@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,7 +23,7 @@ public class PathNamingFragment extends DialogFragment {
 
     private DialogPathNamingListener mListener;
     private EditText mEditText;
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd_HH:mm:ss");
+    private DateFormat format = SimpleDateFormat.getDateTimeInstance();
 
     public PathNamingFragment() {
 

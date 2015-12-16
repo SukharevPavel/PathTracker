@@ -2,12 +2,14 @@ package ru.sukharev.pathtracker.ui;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -21,7 +23,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import ru.sukharev.pathtracker.R;
@@ -219,11 +224,31 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
     public static class PathAdapter extends ArrayAdapter<MapPath> {
 
         private int mResource;
+        private boolean doShowStartTime;
+        private boolean doShowEndTime;
+        private boolean doShowDistance;
+        private boolean doShowVelocity;
 
+        private DateFormat format = SimpleDateFormat.getDateTimeInstance();
 
         public PathAdapter(Context context, int resource, List<MapPath> objects) {
             super(context, resource, objects);
             mResource = resource;
+            getListSettings(context);
+        }
+
+        private void getListSettings(Context ctx) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+            doShowStartTime = prefs.getBoolean(ctx.getString(R.string.pref_key_list_starttime),
+                    ctx.getResources().getBoolean(R.bool.prefs_key_list_starttime_def));
+            doShowEndTime = prefs.getBoolean(ctx.getString(R.string.pref_key_list_endtime),
+                    ctx.getResources().getBoolean(R.bool.prefs_key_list_endtime_def));
+            doShowDistance = prefs.getBoolean(ctx.getString(R.string.pref_key_list_distance),
+                    ctx.getResources().getBoolean(R.bool.prefs_key_list_distance_def));
+            doShowVelocity = prefs.getBoolean(ctx.getString(R.string.pref_key_list_velocity),
+                    ctx.getResources().getBoolean(R.bool.prefs_key_list_velocity_def));
+            Log.i(TAG, doShowStartTime + "  + " + doShowEndTime + " " + doShowDistance + " " + doShowVelocity);
+
         }
 
         public void replaceList(List<MapPath> newList) {
@@ -231,6 +256,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
             clear();
             for (MapPath path : newList)
                 add(path);
+            getListSettings(getContext());
         }
 
         @Override
@@ -243,18 +269,32 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
                 holder.name = (TextView) convertView.findViewById(R.id.list_item_name);
                 holder.startTime = (TextView) convertView.findViewById(R.id.list_start_time);
                 holder.endTime = (TextView) convertView.findViewById(R.id.list_end_time);
+                holder.distance = (TextView) convertView.findViewById(R.id.list_distance);
+                holder.velocity = (TextView) convertView.findViewById(R.id.list_velocity);
                 convertView.setTag(holder);
             } else holder = (ViewHolder) convertView.getTag();
             holder.name.setText(getItem(position).getName());
-            holder.startTime.setText(String.valueOf(getItem(position).getStartTime()));
-            holder.endTime.setText(String.valueOf(getItem(position).getEndTime()));
+            holder.startTime.setText(format.format(new Date(getItem(position).getStartTime())));
+            holder.endTime.setText(format.format(new Date(getItem(position).getEndTime())));
+            holder.distance.setText(String.valueOf(getItem(position).getDistance()));
+            holder.velocity.setText(String.valueOf(getItem(position).getAvgSpeed()));
+            setHolderVisibility(holder);
             return convertView;
+        }
+
+        private void setHolderVisibility(ViewHolder holder) {
+            if (!doShowStartTime) holder.startTime.setVisibility(View.GONE);
+            if (!doShowEndTime) holder.endTime.setVisibility(View.GONE);
+            if (!doShowDistance) holder.distance.setVisibility(View.GONE);
+            if (!doShowVelocity) holder.velocity.setVisibility(View.GONE);
         }
 
         public static class ViewHolder {
             TextView name;
             TextView startTime;
             TextView endTime;
+            TextView distance;
+            TextView velocity;
         }
     }
 }

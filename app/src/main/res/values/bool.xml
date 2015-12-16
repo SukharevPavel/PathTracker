@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="prefs_key_list_starttime_def">true</bool>
+    <bool name="prefs_key_list_endtime_def">true</bool>
+    <bool name="prefs_key_list_distance_def">false</bool>
+    <bool name="prefs_key_list_velocity_def">false</bool>
+
+</resources>

@@ -2,9 +2,11 @@ package ru.sukharev.pathtracker.ui;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 
 import ru.sukharev.pathtracker.R;
 
@@ -13,9 +15,16 @@ import ru.sukharev.pathtracker.R;
  */
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    public static String TAG = "SettingsFragment.java";
+
     private static String[] mapTypes;
     private ListPreference mMapType;
     private ListPreference mMeasureInterval;
+    private CheckBoxPreference mStartTime;
+    private CheckBoxPreference mEndTime;
+    private CheckBoxPreference mDistance;
+    private CheckBoxPreference mAvgSpeed;
+
 
     public SettingsFragment() {
     }
@@ -29,8 +38,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings);
-        setSummary();
     }
+
 
     private void setSummary() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -41,6 +50,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     @Override
     public void onResume() {
         super.onResume();
+        setSummary();
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
     }
@@ -54,24 +64,40 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
 
     private void setSummaryMapType(SharedPreferences prefs) {
-        if (mMapType == null)
-            mMapType = (ListPreference) findPreference(getString(R.string.pref_key_map_type));
+        String key = getString(R.string.pref_key_map_type);
 
-        int mapType = Integer.parseInt(prefs.getString(getString(R.string.pref_key_map_type),
+        if (mMapType == null)
+            mMapType = (ListPreference) findPreference(key);
+
+        int mapType = Integer.parseInt(prefs.getString(key,
                 getString(R.string.pref_key_map_type_def_result)));
         if (mapTypes == null)
             mapTypes = getResources().getStringArray(R.array.array_map_types);
+        try {
+            Log.i(TAG, "mapType[0] = " + mapTypes[0]);
+            Log.i(TAG, "mapType " + mapType);
+            if (mMapType == null) Log.i(TAG, " mMapType is null");
+            if (getPreferenceManager() == null) Log.i(TAG, "preference manager is null");
+            if (getPreferenceManager().getPreferenceScreen() == null)
+                Log.i(TAG, "preference screen is null");
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
         mMapType.setSummary(mapTypes[mapType - 1]);
     }
 
-    private void setSummaryMeasureInterval(SharedPreferences prefs) {
-        if (mMeasureInterval == null)
-            mMeasureInterval = (ListPreference) findPreference(getString(R.string.pref_key_measure_interval));
 
-        String interval = prefs.getString(getString(R.string.pref_key_measure_interval),
+    private void setSummaryMeasureInterval(SharedPreferences prefs) {
+        String key = getString(R.string.pref_key_measure_interval);
+
+        if (mMeasureInterval == null)
+            mMeasureInterval = (ListPreference) findPreference(key);
+
+        String interval = prefs.getString(key,
                 getString(R.string.pref_key_measure_interval_def));
         mMeasureInterval.setSummary(interval);
     }
+
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {

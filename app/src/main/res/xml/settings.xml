@@ -18,4 +18,23 @@
             android:title="@string/pref_measure_interval" />
 
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/list_settings">
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_key_list_starttime"
+            android:title="@string/pref_list_starttime" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_key_list_endtime"
+            android:title="@string/pref_list_endtime" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_list_distance"
+            android:title="@string/pref_list_distance" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_list_velocity"
+            android:title="@string/pref_list_velocity" />
+
+    </PreferenceCategory>
 </PreferenceScreen>

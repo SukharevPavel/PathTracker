@@ -113,8 +113,8 @@ public class ControlFragment extends Fragment {
         }
     }
 
-    public void saveToDatabase(String name) {
-        mHelper.saveToDatabase(name);
+    public void saveToDatabase(String name, double distance, double avgSpeed) {
+        mHelper.saveToDatabase(name, distance, avgSpeed);
     }
 
     public void clearData(){

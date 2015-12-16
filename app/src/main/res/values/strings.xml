@@ -39,6 +39,7 @@
     <string name="title_activity_preference">PreferenceActivity</string>
     <string name="action_settings">Settings</string>
     <string name="map_settings">Map settings</string>
+    <string name="list_settings">List settings</string>
     <string name="menu_settings">Settings</string>
 
     <string name="pref_key_map_settings">pref_key_map_settings</string>
@@ -51,7 +52,15 @@
     <string name="pref_measure_interval">Measure interval</string>
     <string name="pref_measure_interval_dialog">Choose new interval:</string>
     <string name="pref_key_measure_interval_def">10</string>
-
+    <string name="pref_key_list_starttime">pref_key_list_settings</string>
+    <string name="pref_key_list_endtime">pref_key_list_end_time</string>
+    <string name="pref_key_list_velocity">pref_key_list_velocity</string>
+    <string name="pref_key_list_distance">pref_key_list_distance</string>
+    <string name="pref_list_starttime">Show start time</string>
+    <string name="pref_list_endtime">Show end time</string>
+    <string name="pref_list_distance">Show distance</string>
+    <string name="pref_list_velocity">Show velocity</string>
+    <string name="error_no_path_info">Error saving to database - no info about current path</string>
 
     <string-array name="array_map_types">
         <item>Normal</item>

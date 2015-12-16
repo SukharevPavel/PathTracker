@@ -299,6 +299,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()))
                 .title("Start"));
+        updatePolyline(Collections.singletonList(startPoint.toLatLng()));
     }
 
 
@@ -348,7 +349,9 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onGetName(String name) {
-        mControlFragment.saveToDatabase(name);
+        if (mPathInfo != null)
+            mControlFragment.saveToDatabase(name, mPathInfo.getDistance(), mPathInfo.getAvgSpeed());
+        else Toast.makeText(this, R.string.error_no_path_info, Toast.LENGTH_SHORT).show();
     }
 
     @Override

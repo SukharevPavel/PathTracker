@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.preference.PreferenceManager;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.MapPoint;
@@ -84,7 +86,9 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     private void setUpLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
+        mLocationRequest.setInterval(Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(mContext).
+                getString(mContext.getString(R.string.pref_measure_interval),
+                        mContext.getString(R.string.pref_key_measure_interval_def))));
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
@@ -100,8 +104,13 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         mPoints.clear();
     }
 
-    public void saveToDatabase(String name) {
-        new AsynkSaveToDatabaseTask().execute(name);
+    public void saveToDatabase(String name, double distance, double avgSpeed) {
+        MapPath mapPath = new MapPath(name,
+                mPoints.get(0).getTime(),
+                mPoints.get(mPoints.size() - 1).getTime(),
+                distance,
+                avgSpeed);
+        new AsynkSaveToDatabaseTask().execute(mapPath);
     }
 
     public boolean isServiceStarted() {
@@ -180,7 +189,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     }
 
-    private class AsynkSaveToDatabaseTask extends AsyncTask<String, Void, Integer> {
+    private class AsynkSaveToDatabaseTask extends AsyncTask<MapPath, Void, Integer> {
 
         private final static int SUCCESS = 0;
         private final static int FAIL = 1;
@@ -188,13 +197,10 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         private Exception mException;
 
         @Override
-        protected Integer doInBackground(String... params) {
-            String name = params[0];
+        protected Integer doInBackground(MapPath... params) {
             if (!mPoints.isEmpty()) {
                 try {
-                    MapPath mapPath = new MapPath(name,
-                            mPoints.get(0).getTime(),
-                            mPoints.get(mPoints.size() - 1).getTime());
+                    MapPath mapPath = params[0];
                     setPathToPoints(mapPath);
                     mDatabaseHelper.getPathDAO().create(mapPath);
                     saveAllPoints();
