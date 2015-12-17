@@ -31,6 +31,7 @@ import java.util.List;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
+import ru.sukharev.pathtracker.utils.Measurement;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.OrmLoader;
 
@@ -230,10 +231,13 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         private boolean doShowVelocity;
 
         private DateFormat format = SimpleDateFormat.getDateTimeInstance();
+        private Measurement mUnits;
+
 
         public PathAdapter(Context context, int resource, List<MapPath> objects) {
             super(context, resource, objects);
             mResource = resource;
+            mUnits = new Measurement(context);
             getListSettings(context);
         }
 
@@ -256,6 +260,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
             clear();
             for (MapPath path : newList)
                 add(path);
+            mUnits = new Measurement(getContext());
             getListSettings(getContext());
         }
 
@@ -276,7 +281,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
             holder.name.setText(getItem(position).getName());
             holder.startTime.setText(format.format(new Date(getItem(position).getStartTime())));
             holder.endTime.setText(format.format(new Date(getItem(position).getEndTime())));
-            holder.distance.setText(String.valueOf(getItem(position).getDistance()));
+            holder.distance.setText(mUnits.formatMeters(getItem(position).getDistance()));
             holder.velocity.setText(String.valueOf(getItem(position).getAvgSpeed()));
             setHolderVisibility(holder);
             return convertView;

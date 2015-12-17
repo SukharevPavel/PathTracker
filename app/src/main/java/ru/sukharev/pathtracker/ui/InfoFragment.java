@@ -8,10 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ru.sukharev.pathtracker.R;
+import ru.sukharev.pathtracker.utils.Measurement;
 
 
 public class InfoFragment extends Fragment {
@@ -24,13 +26,15 @@ public class InfoFragment extends Fragment {
     public final static String ARG_CUR_SPEED = "cur_speed";
     public final static String ARG_DISTANCE = "distance";
 
-    private SimpleDateFormat format = new SimpleDateFormat("mm:ss");
+    private DateFormat format = SimpleDateFormat.getTimeInstance();
 
 
     private TextView mTimeText;
     private TextView mDistText;
     private TextView mSpeedText;
     private TextView mAvgSpeedText;
+
+    private Measurement mUnits;
 
     private long startTime;
     private long curTime;
@@ -45,6 +49,7 @@ public class InfoFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mUnits = new Measurement(getContext());
         initFields();
         setRetainInstance(true);
     }
@@ -78,7 +83,7 @@ public class InfoFragment extends Fragment {
 
     private void setTextFields(){
         mTimeText.setText(String.valueOf(format.format(new Date(curTime - startTime))));
-        mDistText.setText(String.valueOf(dist));
+        mDistText.setText(mUnits.formatMeters(dist));
         mSpeedText.setText(String.valueOf(curSpeed));
         mAvgSpeedText.setText(String.valueOf(avgSpeed));
 

@@ -4,6 +4,7 @@
 
     <string name="error_saving_to_db">Error saving to database, try again. Maybe, path with this name already exists?</string>
     <string name="error_saving_list_is_empty">List of points is empty</string>
+    <string name="error_no_path_info">Error saving to database - no info about current path</string>
     <!--fragment_dialogs-->
     <string name="type_path_name">Type name of path</string>
     <string name="dialog_save">Save</string>
@@ -41,6 +42,7 @@
     <string name="map_settings">Map settings</string>
     <string name="list_settings">List settings</string>
     <string name="menu_settings">Settings</string>
+    <string name="units_settings">Units</string>
 
     <string name="pref_key_map_settings">pref_key_map_settings</string>
     <string name="pref_key_map_type">pref_key_map_type</string>
@@ -60,7 +62,33 @@
     <string name="pref_list_endtime">Show end time</string>
     <string name="pref_list_distance">Show distance</string>
     <string name="pref_list_velocity">Show velocity</string>
-    <string name="error_no_path_info">Error saving to database - no info about current path</string>
+    <string name="pref_key_units">pref_key_units</string>
+    <string name="pref_key_units_distance">pref_key_unit_distance</string>
+    <string name="pref_key_units_speed">pref_key_unit_speed</string>
+    <string name="pref_units_distance">Distance</string>
+    <string name="pref_units_speed">Speed</string>
+    <string name="pref_units_distance_dialog">Distance units:</string>
+    <string name="pref_units_speed_dialog">Speed units:</string>
+    <string name="pref_key_units_distance_default">Kilometres</string>
+    <string name="pref_key_units_speed_default">per hour</string>
+    <string name="unit_kilometre_suffix">km.</string>
+    <string name="unit_mile_suffix">mi.</string>
+    <string name="unit_metre_suffix">m.</string>
+    <string name="unit_nautical_mile_suffix">nm.</string>
+
+
+    <string-array name="array_distance_units">
+        <item>Kilometres</item>
+        <item>Miles</item>
+        <item>Metres</item>
+        <item>Nautical miles</item>
+    </string-array>
+
+    <string-array name="array_speed_units">
+        <item>per hour</item>
+        <item>per minute</item>
+        <item>per second</item>
+    </string-array>
 
     <string-array name="array_map_types">
         <item>Normal</item>

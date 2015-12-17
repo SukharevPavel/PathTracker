@@ -6,7 +6,6 @@ import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceManager;
-import android.util.Log;
 
 import ru.sukharev.pathtracker.R;
 
@@ -24,6 +23,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     private CheckBoxPreference mEndTime;
     private CheckBoxPreference mDistance;
     private CheckBoxPreference mAvgSpeed;
+    private ListPreference mDistanceUnits;
+    private ListPreference mSpeedUnits;
 
 
     public SettingsFragment() {
@@ -45,7 +46,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         setSummaryMapType(prefs);
         setSummaryMeasureInterval(prefs);
+        setSummaryDistanceUnits(prefs);
+        setSummarySpeedUnits(prefs);
     }
+
 
     @Override
     public void onResume() {
@@ -73,16 +77,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                 getString(R.string.pref_key_map_type_def_result)));
         if (mapTypes == null)
             mapTypes = getResources().getStringArray(R.array.array_map_types);
-        try {
-            Log.i(TAG, "mapType[0] = " + mapTypes[0]);
-            Log.i(TAG, "mapType " + mapType);
-            if (mMapType == null) Log.i(TAG, " mMapType is null");
-            if (getPreferenceManager() == null) Log.i(TAG, "preference manager is null");
-            if (getPreferenceManager().getPreferenceScreen() == null)
-                Log.i(TAG, "preference screen is null");
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
         mMapType.setSummary(mapTypes[mapType - 1]);
     }
 
@@ -98,6 +92,28 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         mMeasureInterval.setSummary(interval);
     }
 
+    private void setSummaryDistanceUnits(SharedPreferences prefs) {
+        String key = getString(R.string.pref_key_units_distance);
+
+        if (mDistanceUnits == null)
+            mDistanceUnits = (ListPreference) findPreference(key);
+
+        String unit = prefs.getString(key, getString(R.string.pref_key_units_distance_default));
+
+        mDistanceUnits.setSummary(unit);
+
+    }
+
+    private void setSummarySpeedUnits(SharedPreferences prefs) {
+        String key = getString(R.string.pref_key_units_speed);
+
+        if (mSpeedUnits == null)
+            mSpeedUnits = (ListPreference) findPreference(key);
+
+        String unit = prefs.getString(key, getString(R.string.pref_key_units_speed_default));
+
+        mSpeedUnits.setSummary(unit);
+    }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -105,5 +121,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             setSummaryMapType(sharedPreferences);
         else if (key.equals(getString(R.string.pref_key_measure_interval)))
             setSummaryMeasureInterval(sharedPreferences);
+        else if (key.equals(getString(R.string.pref_key_units_distance)))
+            setSummaryDistanceUnits(sharedPreferences);
+        else if (key.equals(getString(R.string.pref_key_units_speed)))
+            setSummarySpeedUnits(sharedPreferences);
     }
+
+
 }

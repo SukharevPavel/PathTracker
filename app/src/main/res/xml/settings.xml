@@ -7,7 +7,6 @@
             android:entries="@array/array_map_types"
             android:entryValues="@array/array_map_types_results"
             android:key="@string/pref_key_map_type"
-            android:summary="@string/pref_key_map_type_def"
             android:title="@string/pref_map_type" />
         <ListPreference
             android:defaultValue="@string/pref_key_measure_interval_def"
@@ -35,6 +34,23 @@
             android:defaultValue="false"
             android:key="@string/pref_key_list_velocity"
             android:title="@string/pref_list_velocity" />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/units_settings">
+        <ListPreference
+            android:defaultValue="@string/pref_key_units_distance_default"
+            android:dialogTitle="@string/pref_units_distance_dialog"
+            android:entries="@array/array_distance_units"
+            android:entryValues="@array/array_distance_units"
+            android:key="@string/pref_key_units_distance"
+            android:title="@string/pref_units_distance" />
+        <ListPreference
+            android:defaultValue="@string/pref_key_units_speed_default"
+            android:dialogTitle="@string/pref_units_speed_dialog"
+            android:entries="@array/array_speed_units"
+            android:entryValues="@array/array_speed_units"
+            android:key="@string/pref_key_units_speed"
+            android:title="@string/pref_units_speed" />
 
     </PreferenceCategory>
 </PreferenceScreen>
