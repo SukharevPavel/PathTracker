@@ -84,8 +84,8 @@ public class InfoFragment extends Fragment {
     private void setTextFields(){
         mTimeText.setText(String.valueOf(format.format(new Date(curTime - startTime))));
         mDistText.setText(mUnits.formatMeters(dist));
-        mSpeedText.setText(String.valueOf(curSpeed));
-        mAvgSpeedText.setText(String.valueOf(avgSpeed));
+        mSpeedText.setText(mUnits.formatSpeed(curSpeed));
+        mAvgSpeedText.setText(mUnits.formatSpeed(avgSpeed));
 
     }
 

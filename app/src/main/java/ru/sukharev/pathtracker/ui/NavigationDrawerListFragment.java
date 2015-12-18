@@ -282,7 +282,7 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
             holder.startTime.setText(format.format(new Date(getItem(position).getStartTime())));
             holder.endTime.setText(format.format(new Date(getItem(position).getEndTime())));
             holder.distance.setText(mUnits.formatMeters(getItem(position).getDistance()));
-            holder.velocity.setText(String.valueOf(getItem(position).getAvgSpeed()));
+            holder.velocity.setText(mUnits.formatSpeed(getItem(position).getAvgSpeed()));
             setHolderVisibility(holder);
             return convertView;
         }

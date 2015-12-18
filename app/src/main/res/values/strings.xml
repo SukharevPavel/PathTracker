@@ -71,10 +71,13 @@
     <string name="pref_units_speed_dialog">Speed units:</string>
     <string name="pref_key_units_distance_default">Kilometres</string>
     <string name="pref_key_units_speed_default">per hour</string>
-    <string name="unit_kilometre_suffix">km.</string>
-    <string name="unit_mile_suffix">mi.</string>
-    <string name="unit_metre_suffix">m.</string>
-    <string name="unit_nautical_mile_suffix">nm.</string>
+    <string name="unit_kilometre_suffix">km</string>
+    <string name="unit_mile_suffix">mi</string>
+    <string name="unit_metre_suffix">m</string>
+    <string name="unit_nautical_mile_suffix">nm</string>
+    <string name="unit_hour_suffix">h</string>
+    <string name="unit_minute_suffix">m</string>
+    <string name="unit_second_suffix">s</string>
 
 
     <string-array name="array_distance_units">
