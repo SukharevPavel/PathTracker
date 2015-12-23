@@ -18,6 +18,7 @@ public class MapPoint {
     public final static String COLUMN_Y = "loc_long";
     public final static String COLUMN_DATE = "date";
     public final static String COLUMN_SPEED = "speed";
+    public final static String COLUMN_HAS_SPEED = "has_speed";
     @DatabaseField(foreign = true)
     MapPath path;
     @DatabaseField(generatedId = true)
@@ -30,6 +31,8 @@ public class MapPoint {
     private long time;
     @DatabaseField(dataType = DataType.DOUBLE, columnName = COLUMN_SPEED)
     private double speed;
+    @DatabaseField(dataType = DataType.BOOLEAN, columnName = COLUMN_HAS_SPEED)
+    private boolean hasSpeed;
 
     public MapPoint(double loc_x, double loc_y, long time) {
         this.lattitude = loc_x;
@@ -49,6 +52,14 @@ public class MapPoint {
 
     MapPoint() {
 
+    }
+
+    public boolean isHasSpeed() {
+        return hasSpeed;
+    }
+
+    public void setHasSpeed(boolean hasSpeed) {
+        this.hasSpeed = hasSpeed;
     }
 
     public double getSpeed() {

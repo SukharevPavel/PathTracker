@@ -329,12 +329,17 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             }
             getSupportFragmentManager()
                     .beginTransaction()
+                            //.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .setCustomAnimations(R.anim.anim_info_in,
+                            R.anim.anim_info_out)
                     .add(R.id.info_fragment, mInfoFragment, INFO_FRAGMENT_TAG)
                     .commit();
         }
         else {
             getSupportFragmentManager()
                     .beginTransaction()
+                    .setCustomAnimations(R.anim.anim_info_in,
+                            R.anim.anim_info_out)
                     .remove(mInfoFragment)
                     .commit();
             mInfoFragment = null;

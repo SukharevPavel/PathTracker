@@ -12,13 +12,6 @@ import ru.sukharev.pathtracker.utils.orm.MapPoint;
  */
 public class PathInfo {
 
-    /**
-    * dummy providers needs for init Location objects and use distanceTo() method
-    * @see #findDistance
-     */
-    private final static String DUMMY_PROVIDER_A = "A";
-    private final static String DUMMY_PROVIDER_B = "B";
-
     private long mStartTime;
     private long mCurTime;
     private double mDistance;
@@ -45,13 +38,14 @@ public class PathInfo {
     }
 
     private double findDistance(MapPoint point1, MapPoint point2) {
-        Location locationA = new Location(DUMMY_PROVIDER_A);
-        locationA.setLatitude(point1.getLattitude());
-        locationA.setLongitude(point1.getLongitude());
-        Location locationB = new Location(DUMMY_PROVIDER_B);
-        locationB.setLatitude(point2.getLattitude());
-        locationB.setLongitude(point2.getLongitude());
-        return locationA.distanceTo(locationB);
+        //Because of documentation of Location.distanceBetween function
+        float[] result = new float[1];
+        Location.distanceBetween(point1.getLattitude(),
+                point1.getLongitude(),
+                point2.getLattitude(),
+                point2.getLongitude(),
+                result);
+        return result[0];
     }
 
     public void addPointInfo(List<MapPoint> list){
@@ -60,19 +54,25 @@ public class PathInfo {
     }
 
     public void addPointInfo(MapPoint point){
-        mDistance += findDistance(mPoints.get(mPoints.size() - 1), point);
+        double curDist = findDistance(mPoints.get(mPoints.size() - 1), point);
+        mDistance += curDist;
         mPoints.add(point);
 
-        findAvgSpeed(point);
+        curSpeed = (point.isHasSpeed() ? point.getSpeed() :
+                findPreciseAvgSpeed(curDist, point.getTime() - getCurTime()));
+        findAvgSpeed(point.getTime(), curSpeed);
 
         mCurTime = point.getTime();
-        curSpeed = point.getSpeed();
     }
 
-    private void findAvgSpeed(MapPoint point){
-        avgSpeed = (avgSpeed * (mCurTime-mStartTime) +
-                (point.getTime() - mCurTime) * point.getSpeed())
-                / (point.getTime() - mStartTime);
+    private double findPreciseAvgSpeed(double dist, long time) {
+        return dist / time;
+    }
+
+    private void findAvgSpeed(long time, double speed) {
+        avgSpeed = (getAvgSpeed() * (getCurTime() - getStartTime()) +
+                (time - getCurTime()) * speed)
+                / (time - getStartTime());
     }
 
 

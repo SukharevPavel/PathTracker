@@ -68,7 +68,6 @@ public class InfoFragment extends Fragment {
         return v;
     }
 
-
     private void initFields(){
         Bundle bundle = getArguments();
         if (bundle != null) {
