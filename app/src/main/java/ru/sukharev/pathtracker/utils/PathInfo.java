@@ -1,6 +1,7 @@
 package ru.sukharev.pathtracker.utils;
 
 import android.location.Location;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,8 @@ import ru.sukharev.pathtracker.utils.orm.MapPoint;
  */
 public class PathInfo {
 
+    private final static int MS_IN_SECOND = 1000;
+    private final static String TAG = PathInfo.class.toString();
     private long mStartTime;
     private long mCurTime;
     private double mDistance;
@@ -56,16 +59,20 @@ public class PathInfo {
     public void addPointInfo(MapPoint point){
         double curDist = findDistance(mPoints.get(mPoints.size() - 1), point);
         mDistance += curDist;
-        mPoints.add(point);
+        Log.i(TAG, "dist = " + curDist + " speed = " + point.getSpeed());
 
+        //div 1000 cause conversion ms to seconds
         curSpeed = (point.isHasSpeed() ? point.getSpeed() :
-                findPreciseAvgSpeed(curDist, point.getTime() - getCurTime()));
+                findPreciseAvgSpeed(curDist, (point.getTime() - getCurTime()) / 1000));
         findAvgSpeed(point.getTime(), curSpeed);
-
+        Log.i(TAG, "avg speed = " + getAvgSpeed());
         mCurTime = point.getTime();
+
+        mPoints.add(point);
     }
 
     private double findPreciseAvgSpeed(double dist, long time) {
+        Log.i(TAG, "find precise dist =" + dist + " time=" + time);
         return dist / time;
     }
 
