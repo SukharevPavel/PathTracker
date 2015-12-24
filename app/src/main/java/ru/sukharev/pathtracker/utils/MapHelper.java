@@ -15,6 +15,7 @@ import com.google.android.gms.location.LocationServices;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
@@ -86,9 +87,10 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     private void setUpLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(mContext).
+        mLocationRequest.setInterval(TimeUnit.SECONDS.toMillis(
+                Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(mContext).
                 getString(mContext.getString(R.string.pref_key_measure_interval),
-                        mContext.getString(R.string.pref_key_measure_interval_def))));
+                        mContext.getString(R.string.pref_key_measure_interval_def)))));
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 

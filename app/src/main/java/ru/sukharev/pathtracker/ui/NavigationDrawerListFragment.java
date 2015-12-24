@@ -4,21 +4,23 @@ package ru.sukharev.pathtracker.ui;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,31 +37,35 @@ import ru.sukharev.pathtracker.utils.Measurement;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.OrmLoader;
 
+interface OnRecyclerViewClickListener {
+
+    void onRecyclerViewClick(MapPath path);
+
+}
+
+interface ViewHolderContextMenuItemListener {
+
+    void onContextMenuSelect(MapPath path);
+
+}
+
 /**
  * NavigationDrawer that shows the list of saved path and allows to interact with them
  */
-public class NavigationDrawerListFragment extends ListFragment implements LoaderManager.LoaderCallbacks {
+public class NavigationDrawerListFragment extends Fragment implements LoaderManager.LoaderCallbacks,
+        OnRecyclerViewClickListener {
 
     public final static int NO_SELECTION = -1;
     private final static int PATH_LOADER_ID = 1;
     private final static String TAG = "NavigationDrawer.java";
+    private RecyclerView mRecyclerView;
     private PathAdapter mAdapter;
     private View mDrawerView;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private PathItemClickListener mPathListener;
-    private int mSelectedItem = NO_SELECTION;
-    private AdapterView.OnItemClickListener mItemListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (mPathListener != null) {
-                mSelectedItem = position;
-                selectItem(mSelectedItem);
-            }
-            if (mDrawerLayout != null)
-                mDrawerLayout.closeDrawer(mDrawerView);
-        }
-    };
+    private MapPath mSelectedItem = null;
+
 
 
     public NavigationDrawerListFragment() {
@@ -76,59 +82,55 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        mAdapter = new PathAdapter(getContext(),
-                R.layout.navigation_drawer_list_item,
-                new ArrayList<MapPath>());
-    }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
         getLoaderManager().initLoader(PATH_LOADER_ID, null, this);
 
-        setListAdapter(mAdapter);
-        return inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mAdapter = new PathAdapter(getContext(),
+                new ArrayList<MapPath>(), this);
+        mRecyclerView.setAdapter(mAdapter);
+        //setListAdapter(mAdapter);
+        return v;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setRetainInstance(true);
-        registerForContextMenu(getListView());
+        //  registerForContextMenu(getListView());
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
         mPathListener = (PathItemClickListener) getActivity();
-        getListView().setOnItemClickListener(mItemListener);
+        // getListView().setOnItemClickListener(mItemListener);
         selectItem(mSelectedItem);
     }
 
-    private void selectItem(int position) {
-        if (position != NO_SELECTION)
-            mPathListener.onPathClick(mAdapter.getItem(position));
+    private void selectItem(MapPath path) {
+        if (path != null)
+            mPathListener.onPathClick(path);
     }
 
     public void invalidateSelection() {
-        mSelectedItem = NO_SELECTION;
+        mSelectedItem = null;
     }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        getActivity().getMenuInflater().inflate(R.menu.context_list_menu, menu);
-    }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        Log.i(TAG, "context menu item selected pos = " + mAdapter.getSelected());
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.delete_item:
                 try {
-                    deletePathFromDatabase(mAdapter.getItem(info.position));
-                    mAdapter.remove(mAdapter.getItem(info.position));
+                    deletePathFromDatabase(mAdapter.getSelected());
+                    mAdapter.remove(mAdapter.getSelected());
                 } catch (SQLException e) {
                     e.printStackTrace();
                     Toast.makeText(getContext(), getString(R.string.error_delete_path), Toast.LENGTH_LONG).show();
@@ -214,6 +216,16 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
+    @Override
+    public void onRecyclerViewClick(MapPath path) {
+        if (mPathListener != null) {
+            mSelectedItem = path;
+            selectItem(mSelectedItem);
+        }
+        if (mDrawerLayout != null)
+            mDrawerLayout.closeDrawer(mDrawerView);
+    }
+
 
     public interface PathItemClickListener {
 
@@ -221,24 +233,39 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
     }
 
+    public static class PathAdapter extends RecyclerView.Adapter<PathAdapter.ViewHolder>
+            implements ViewHolderContextMenuItemListener {
 
-    public static class PathAdapter extends ArrayAdapter<MapPath> {
-
-        private int mResource;
+        private final Context mContext;
+        private final DateFormat format = SimpleDateFormat.getDateTimeInstance();
+        private Measurement mUnits;
+        private List<MapPath> mObjects;
         private boolean doShowStartTime;
         private boolean doShowEndTime;
         private boolean doShowDistance;
         private boolean doShowVelocity;
+        private MenuInflater mMenuInflater;
+        private OnRecyclerViewClickListener mListener;
+        private MapPath mSelectedPath;
 
-        private DateFormat format = SimpleDateFormat.getDateTimeInstance();
-        private Measurement mUnits;
+        public PathAdapter(Context ctx, List<MapPath> list, OnRecyclerViewClickListener listener) {
+            mObjects = list;
+            mContext = ctx;
+            mListener = listener;
+            getListSettings(getContext());
+            mMenuInflater = new MenuInflater(getContext());
+        }
+
+        public void replaceList(List<MapPath> newList) {
+            mObjects = newList;
+            mUnits = new Measurement(getContext());
+            getListSettings(getContext());
+            notifyDataSetChanged();
+        }
 
 
-        public PathAdapter(Context context, int resource, List<MapPath> objects) {
-            super(context, resource, objects);
-            mResource = resource;
-            mUnits = new Measurement(context);
-            getListSettings(context);
+        public Context getContext() {
+            return mContext;
         }
 
         private void getListSettings(Context ctx) {
@@ -255,36 +282,31 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
 
         }
 
-        public void replaceList(List<MapPath> newList) {
-            //T0D0 can be done faster, if check equality of lists
-            clear();
-            for (MapPath path : newList)
-                add(path);
-            mUnits = new Measurement(getContext());
-            getListSettings(getContext());
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            Log.i(TAG, "create holder");
+            View view = LayoutInflater.from(mContext).
+                    inflate(R.layout.navigation_drawer_list_item, parent, false);
+            return new ViewHolder(view, mMenuInflater, this);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            //return super.getView(position, convertView, parent);
-            ViewHolder holder;
-            if (convertView == null) {
-                holder = new ViewHolder();
-                convertView = LayoutInflater.from(getContext()).inflate(mResource, parent, false);
-                holder.name = (TextView) convertView.findViewById(R.id.list_item_name);
-                holder.startTime = (TextView) convertView.findViewById(R.id.list_start_time);
-                holder.endTime = (TextView) convertView.findViewById(R.id.list_end_time);
-                holder.distance = (TextView) convertView.findViewById(R.id.list_distance);
-                holder.velocity = (TextView) convertView.findViewById(R.id.list_velocity);
-                convertView.setTag(holder);
-            } else holder = (ViewHolder) convertView.getTag();
-            holder.name.setText(getItem(position).getName());
-            holder.startTime.setText(format.format(new Date(getItem(position).getStartTime())));
-            holder.endTime.setText(format.format(new Date(getItem(position).getEndTime())));
-            holder.distance.setText(mUnits.formatMeters(getItem(position).getDistance()));
-            holder.velocity.setText(mUnits.formatSpeed(getItem(position).getAvgSpeed()));
+        public void onBindViewHolder(ViewHolder holder, final int position) {
+            Log.i(TAG, "bind holder pos=" + position);
+            final MapPath path = getItem(position);
+            holder.path = path;
+            holder.name.setText(holder.path.getName());
+            holder.startTime.setText(format.format(new Date(holder.path.getStartTime())));
+            holder.endTime.setText(format.format(new Date(holder.path.getEndTime())));
+            holder.distance.setText(mUnits.formatMeters(holder.path.getDistance()));
+            holder.velocity.setText(mUnits.formatSpeed(holder.path.getAvgSpeed()));
+            holder.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.onRecyclerViewClick(path);
+                }
+            });
             setHolderVisibility(holder);
-            return convertView;
         }
 
         private void setHolderVisibility(ViewHolder holder) {
@@ -294,12 +316,68 @@ public class NavigationDrawerListFragment extends ListFragment implements Loader
             if (!doShowVelocity) holder.velocity.setVisibility(View.GONE);
         }
 
-        public static class ViewHolder {
+        public MapPath getItem(int position) {
+            return mObjects.get(position);
+        }
+
+        public void remove(MapPath path) {
+            int pos = mObjects.indexOf(path);
+            mObjects.remove(path);
+            notifyItemRemoved(pos);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mObjects.size();
+        }
+
+        @Override
+        public void onContextMenuSelect(MapPath path) {
+            mSelectedPath = path;
+        }
+
+        public MapPath getSelected() {
+            return mSelectedPath;
+        }
+
+        public static class ViewHolder extends RecyclerView.ViewHolder
+                implements View.OnCreateContextMenuListener {
+
+            final MenuInflater mMenuInflater;
             TextView name;
             TextView startTime;
             TextView endTime;
             TextView distance;
             TextView velocity;
+            View mView;
+            MapPath path;
+            private ViewHolderContextMenuItemListener mListener;
+
+
+            public ViewHolder(View itemView, MenuInflater inflater,
+                              ViewHolderContextMenuItemListener listener) {
+                super(itemView);
+                mView = itemView;
+                mListener = listener;
+                itemView.setOnCreateContextMenuListener(this);
+                name = (TextView) itemView.findViewById(R.id.list_item_name);
+                startTime = (TextView) itemView.findViewById(R.id.list_start_time);
+                endTime = (TextView) itemView.findViewById(R.id.list_end_time);
+                distance = (TextView) itemView.findViewById(R.id.list_distance);
+                velocity = (TextView) itemView.findViewById(R.id.list_velocity);
+                mMenuInflater = inflater;
+            }
+
+            public void setOnClickListener(View.OnClickListener listener) {
+                mView.setOnClickListener(listener);
+            }
+
+            @Override
+            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                mMenuInflater.inflate(R.menu.context_list_menu, menu);
+                mListener.onContextMenuSelect(path);
+            }
         }
     }
+
 }

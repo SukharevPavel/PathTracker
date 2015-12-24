@@ -5,14 +5,10 @@
     tools:context="ru.sukharev.pathtracker.ui.NavigationDrawerListFragment">
 
     <!-- TODO: make a header -->
-    <TextView
-        android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/list_is_empty" />
-    <ListView
-        android:id="@android:id/list"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+
 
 </FrameLayout>
