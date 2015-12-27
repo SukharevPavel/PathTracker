@@ -55,7 +55,6 @@ interface ViewHolderContextMenuItemListener {
 public class NavigationDrawerListFragment extends Fragment implements LoaderManager.LoaderCallbacks,
         OnRecyclerViewClickListener {
 
-    public final static int NO_SELECTION = -1;
     private final static int PATH_LOADER_ID = 1;
     private final static String TAG = "NavigationDrawer.java";
     private RecyclerView mRecyclerView;

@@ -113,6 +113,10 @@ public class ControlFragment extends Fragment {
         }
     }
 
+    public boolean isServiceStarted() {
+        return mHelper.isServiceStarted();
+    }
+
     public void saveToDatabase(String name, double distance, double avgSpeed) {
         mHelper.saveToDatabase(name, distance, avgSpeed);
     }

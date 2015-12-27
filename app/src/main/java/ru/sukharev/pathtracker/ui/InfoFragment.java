@@ -8,12 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.Measurement;
+import ru.sukharev.pathtracker.utils.TimerView;
 
 
 public class InfoFragment extends Fragment {
@@ -26,10 +23,10 @@ public class InfoFragment extends Fragment {
     public final static String ARG_CUR_SPEED = "cur_speed";
     public final static String ARG_DISTANCE = "distance";
 
-    private DateFormat format = SimpleDateFormat.getTimeInstance();
+    private final static int NO_DATA = 0;
 
 
-    private TextView mTimeText;
+    private TimerView mTimeText;
     private TextView mDistText;
     private TextView mSpeedText;
     private TextView mAvgSpeedText;
@@ -60,13 +57,14 @@ public class InfoFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_info, container, false);
 
 
-        mTimeText = (TextView) v.findViewById(R.id.info_timer);
+        mTimeText = (TimerView) v.findViewById(R.id.info_timer);
         mDistText = (TextView) v.findViewById(R.id.info_dist);
         mSpeedText = (TextView) v.findViewById(R.id.info_cur_speed);
         mAvgSpeedText = (TextView) v.findViewById(R.id.info_avg_speed);
         setTextFields();
         return v;
     }
+
 
     private void initFields(){
         Bundle bundle = getArguments();
@@ -80,8 +78,10 @@ public class InfoFragment extends Fragment {
         }
     }
 
+
     private void setTextFields(){
-        mTimeText.setText(String.valueOf(format.format(new Date(curTime - startTime))));
+        //mTimeText.setText(String.valueOf(format.format(new Date(curTime - startTime))));
+        mTimeText.setNewTime(curTime - startTime);
         mDistText.setText(mUnits.formatMeters(dist));
         mSpeedText.setText(mUnits.formatSpeed(curSpeed));
         mAvgSpeedText.setText(mUnits.formatSpeed(avgSpeed));
@@ -92,12 +92,16 @@ public class InfoFragment extends Fragment {
                               double avgSpeed){
         Log.i(TAG, "update");
         Log.i(TAG, "start time = " + startTime + "\n curTime = " + curTime);
-        Log.i(TAG, "start time = " + format.format(new Date(startTime)) + "\n curTime = " + format.format(new Date(curTime)));
         this.startTime = startTime;
         this.curTime = curTime;
         this.dist = dist;
         this.curSpeed = curSpeed;
         this.avgSpeed = avgSpeed;
+        setTextFields();
+    }
+
+    public void dropAllFields() {
+        this.avgSpeed = this.curSpeed = this.dist = this.curTime = this.startTime = NO_DATA;
         setTextFields();
     }
 

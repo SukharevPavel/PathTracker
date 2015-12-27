@@ -241,9 +241,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     private void updateInfoFragmentIfExists(){
-        if (mInfoFragment != null) mInfoFragment.updateFields(mPathInfo.getStartTime(),
+        if (mInfoFragment != null)
+            if (mPathInfo != null) mInfoFragment.updateFields(mPathInfo.getStartTime(),
                 mPathInfo.getCurTime(), mPathInfo.getDistance(), mPathInfo.getCurSpeed(),
                 mPathInfo.getAvgSpeed());
+            else mInfoFragment.dropAllFields();
     }
 
     private void addListOfPoints(List<MapPoint> pointList) {
@@ -399,6 +401,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onClear() {
         clearMap();
         mControlFragment.clearData();
+        updateInfoFragmentIfExists();
     }
 
     @Override
