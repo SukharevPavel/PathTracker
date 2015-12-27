@@ -2,8 +2,10 @@ package ru.sukharev.pathtracker.ui;
 
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,6 +38,7 @@ import java.util.List;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.ui.dialog.ClearDialogFragment;
+import ru.sukharev.pathtracker.ui.dialog.EnableGPSDialogFragment;
 import ru.sukharev.pathtracker.ui.dialog.PathNamingFragment;
 import ru.sukharev.pathtracker.utils.MapHelper;
 import ru.sukharev.pathtracker.utils.PathInfo;
@@ -52,6 +55,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private final static String PATH_NAMING_FRAGMENT_TAG = "path_naming_fragment";
     private final static String CLEAR_FRAGMENT_TAG = "clear_fragment";
     private final static String INFO_FRAGMENT_TAG = "info_fragment";
+    private final static String ENABLE_GPS_FRAGMENT_TAG = "enable_gps_fragment";
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ControlFragment mControlFragment;
@@ -61,6 +65,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private PathInfo mPathInfo;
 
     private boolean isShowingSaved;
+    private boolean isAskedForGPS;
     private InfoFragment mInfoFragment;
 
     @Override
@@ -75,7 +80,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
         setUpFragments();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
             checkPermission();
     }
 
@@ -98,8 +104,18 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     protected void onResume() {
+        checkGPS();
         setUpMapIfNeeded();
         super.onResume();
+    }
+
+    private void checkGPS() {
+        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !isAskedForGPS) {
+            isAskedForGPS = true;
+            EnableGPSDialogFragment fragment = new EnableGPSDialogFragment();
+            fragment.show(getSupportFragmentManager(), ENABLE_GPS_FRAGMENT_TAG);
+        }
     }
 
 
@@ -154,6 +170,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment))
                     .getMap();
             setMapType();
+            mMap.setMyLocationEnabled(true);
 
 
         }

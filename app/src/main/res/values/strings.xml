@@ -11,6 +11,7 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="path_name_hint">Path-</string>
 
+    <string name="dialog_enable_GPS">Use GPS for better performance?</string>
     <string name="dialog_is_really_clear">Do you really want to clear current path?</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
