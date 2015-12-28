@@ -39,6 +39,7 @@ import java.util.List;
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.ui.dialog.ClearDialogFragment;
 import ru.sukharev.pathtracker.ui.dialog.EnableGPSDialogFragment;
+import ru.sukharev.pathtracker.ui.dialog.ErrorDialogFragment;
 import ru.sukharev.pathtracker.ui.dialog.PathNamingFragment;
 import ru.sukharev.pathtracker.utils.MapHelper;
 import ru.sukharev.pathtracker.utils.PathInfo;
@@ -56,6 +57,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private final static String CLEAR_FRAGMENT_TAG = "clear_fragment";
     private final static String INFO_FRAGMENT_TAG = "info_fragment";
     private final static String ENABLE_GPS_FRAGMENT_TAG = "enable_gps_fragment";
+    private final static String ERROR_DIALOG_FRAGMENT_TAG = "error_fragment";
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private ControlFragment mControlFragment;
@@ -65,7 +67,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private PathInfo mPathInfo;
 
     private boolean isShowingSaved;
-    private boolean isAskedForGPS;
     private InfoFragment mInfoFragment;
 
     @Override
@@ -80,9 +81,13 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
         setUpFragments();
 
+        checkPermission();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            checkPermission();
+
+        //check GPS if only first time launch
+        if (savedInstanceState == null)
+            checkGPS();
+
     }
 
     @Override
@@ -104,15 +109,14 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     protected void onResume() {
-        checkGPS();
         setUpMapIfNeeded();
         super.onResume();
     }
 
     private void checkGPS() {
         LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !isAskedForGPS) {
-            isAskedForGPS = true;
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+                getSupportFragmentManager().findFragmentByTag(ENABLE_GPS_FRAGMENT_TAG) == null) {
             EnableGPSDialogFragment fragment = new EnableGPSDialogFragment();
             fragment.show(getSupportFragmentManager(), ENABLE_GPS_FRAGMENT_TAG);
         }
@@ -132,6 +136,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     private void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             requestLocationPermission();
     }
@@ -146,7 +151,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.length != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                //T0D0 show error and close
+                ErrorDialogFragment fragment = new ErrorDialogFragment();
+                fragment.show(getSupportFragmentManager(), ERROR_DIALOG_FRAGMENT_TAG);
             }
         }
     }

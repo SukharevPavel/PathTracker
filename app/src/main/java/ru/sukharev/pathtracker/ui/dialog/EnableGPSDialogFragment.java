@@ -11,7 +11,7 @@ import android.support.v4.app.DialogFragment;
 import ru.sukharev.pathtracker.R;
 
 /**
- * Created by hpc on 12/27/15.
+ * Ask user to enable GPS
  */
 public class EnableGPSDialogFragment extends DialogFragment {
 

@@ -13,6 +13,7 @@
 
     <string name="dialog_enable_GPS">Use GPS for better performance?</string>
     <string name="dialog_is_really_clear">Do you really want to clear current path?</string>
+    <string name="dialog_error_get_permission">Can\'t get permission to access location</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_no">No</string>
     <!--fragment_control -->
