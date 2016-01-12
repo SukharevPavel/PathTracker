@@ -20,6 +20,9 @@ public class PathInfo {
     private double avgSpeed;
     private List<MapPoint> mPoints;
 
+    private long mAwaitingTime;
+    private boolean isPaused = false;
+
 
     public PathInfo(List<MapPoint> points) {
         this(points.get(0));
@@ -55,6 +58,8 @@ public class PathInfo {
     }
 
     public void addPointInfo(MapPoint point){
+
+
         double curDist = findDistance(mPoints.get(mPoints.size() - 1), point);
         mDistance += curDist;
 
@@ -63,7 +68,24 @@ public class PathInfo {
         findAvgSpeed(point.getTime(), curSpeed);
         mCurTime = point.getTime();
 
+        checkIsStopped(point);
+
         mPoints.add(point);
+    }
+
+    public void pauseAndSetLastPointAsEnd() {
+        MapPoint point = mPoints.get(mPoints.size() - 1);
+        point.setIsEndPoint(true);
+        mPoints.set(mPoints.size() - 1, point);
+        isPaused = true;
+    }
+
+
+    private void checkIsStopped(MapPoint point) {
+        if (isPaused) {
+            mAwaitingTime += point.getTime() - mPoints.get(mPoints.size() - 1).getTime();
+            isPaused = false;
+        }
     }
 
     private double findPreciseAvgSpeed(double dist, long time) {
@@ -72,11 +94,15 @@ public class PathInfo {
     }
 
     private void findAvgSpeed(long time, double speed) {
-        avgSpeed = (getAvgSpeed() * (getCurTime() - getStartTime()) +
+        avgSpeed = (getAvgSpeed() * (getCurTime() - getStartTime() - getAwaitingTime()) +
                 (time - getCurTime()) * speed)
-                / (time - getStartTime());
+                / (time - getStartTime() - getAwaitingTime());
     }
 
+
+    private long getAwaitingTime() {
+        return mAwaitingTime;
+    }
 
     public long getStartTime() {
         return mStartTime;
@@ -84,6 +110,10 @@ public class PathInfo {
 
     public long getCurTime() {
         return mCurTime;
+    }
+
+    public long getTotalTime() {
+        return getCurTime() - getStartTime() - getAwaitingTime();
     }
 
     public double getDistance() {

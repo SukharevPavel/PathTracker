@@ -38,6 +38,8 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     private DatabaseHelper mDatabaseHelper;
     private LocationRequest mLocationRequest;
 
+    private boolean isWaitingForStartPoint;
+
     private GoogleApiClient mGoogleApiClient;
 
 
@@ -58,6 +60,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     private void stopTracking() {
         isServiceStarted = false;
+        mListener.onEndPoint(setEndPoint());
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
         mListener.onServiceStop();
@@ -78,6 +81,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     public void startService() {
         setUpLocationRequest();
+        isWaitingForStartPoint = true;
         mGoogleApiClient.connect();
         /*Log.i(TAG, "startService()");
         Intent intent = new Intent(mContext, TrackingService.class);
@@ -89,8 +93,8 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(TimeUnit.SECONDS.toMillis(
                 Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(mContext).
-                getString(mContext.getString(R.string.pref_key_measure_interval),
-                        mContext.getString(R.string.pref_key_measure_interval_def)))));
+                        getString(mContext.getString(R.string.pref_key_measure_interval),
+                                mContext.getString(R.string.pref_key_measure_interval_def)))));
         mLocationRequest.setFastestInterval(mLocationRequest.getInterval() / 2);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
@@ -106,6 +110,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     }
 
     public void saveToDatabase(String name, double distance, double avgSpeed) {
+        setEndPoint();
         MapPath mapPath = new MapPath(name,
                 mPoints.get(0).getTime(),
                 mPoints.get(mPoints.size() - 1).getTime(),
@@ -129,8 +134,25 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     }
 
 
+    private void processPoint(MapPoint newMapPoint) {
+        newMapPoint.setIsStartPoint(isWaitingForStartPoint);
+        notifyUI(newMapPoint);
+        addPointToList(newMapPoint);
+    }
+
+    private MapPoint setEndPoint() {
+        MapPoint point = mPoints.get(mPoints.size() - 1);
+        point.setIsEndPoint(true);
+        mPoints.set(mPoints.size() - 1, point);
+        return point;
+    }
+
+
     private void notifyUI(MapPoint newMapPoint) {
-        if (mPoints.isEmpty()) mListener.onStartPoint(newMapPoint);
+        if (isWaitingForStartPoint) {
+            mListener.onStartPoint(newMapPoint);
+            isWaitingForStartPoint = false;
+        }
         else mListener.onNewPoint(newMapPoint);
     }
 
@@ -159,8 +181,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     @Override
     public void onLocationChanged(Location location) {
         MapPoint newMapPoint = new MapPoint(location);
-        notifyUI(newMapPoint);
-        addPointToList(newMapPoint);
+        processPoint(newMapPoint);
     }
 
 

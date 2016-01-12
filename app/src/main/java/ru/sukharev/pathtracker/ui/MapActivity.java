@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,8 +22,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -49,7 +53,7 @@ import ru.sukharev.pathtracker.utils.orm.MapPoint;
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener,
         MapHelper.SQLInteractionListener, PathNamingFragment.DialogPathNamingListener,
         NavigationDrawerListFragment.PathItemClickListener, ControlFragment.ControlFragmentListener,
-        ClearDialogFragment.DialogClearListener {
+        ClearDialogFragment.DialogClearListener, GoogleMap.OnMyLocationChangeListener {
 
     private final static String TAG = "MapActivity.java";
 
@@ -63,7 +67,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private ControlFragment mControlFragment;
     private NavigationDrawerListFragment mNavigationDrawerFragment;
     private Toolbar mToolbar;
-    private Polyline mPolyline;
+    private List<Polyline> mPolylines;
     private PathInfo mPathInfo;
 
     private boolean isShowingSaved;
@@ -83,10 +87,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
         checkPermission();
 
-
-        //check GPS if only first time launch
-        if (savedInstanceState == null)
+        //check GPS and center user location only if first time launch
+        if (savedInstanceState == null) {
+            mMap.setOnMyLocationChangeListener(this);
             checkGPS();
+        }
 
     }
 
@@ -176,8 +181,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment))
                     .getMap();
             setMapType();
+            mPolylines = new ArrayList<>();
             mMap.setMyLocationEnabled(true);
-
 
         }
     }
@@ -203,7 +208,9 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     private void clearMap() {
         if (mMap != null) {
             mMap.clear();
-            removePolyline();
+            for (Polyline polyline : mPolylines)
+                removePolyline(polyline);
+            mPolylines.clear();
         }
         if (mPathInfo != null)
             mPathInfo = null;
@@ -227,25 +234,36 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
 
-    private void removePolyline() {
-        if (mPolyline != null) {
-            mPolyline.remove();
-            mPolyline = null;
+    private void removePolyline(Polyline polyline) {
+        if (polyline != null) {
+            polyline.remove();
         }
     }
 
+    private void addPolyline(Iterable<LatLng> list) {
+        PolylineOptions options = new PolylineOptions().
+                geodesic(true).
+                color(ContextCompat.getColor(this, R.color.red_lt))
+                .addAll(list);
+        Polyline polyline = mMap.addPolyline(options);
+        mPolylines.add(polyline);
+
+    }
+
     private void updatePolyline(Iterable<LatLng> list) {
+        Polyline polyline = mPolylines.get(mPolylines.size() - 1);
         Iterable<LatLng> resultList = null;
-        if (mPolyline != null) {
-            resultList = mPolyline.getPoints();
-            removePolyline();
+        if (polyline != null) {
+            resultList = polyline.getPoints();
+            removePolyline(polyline);
         }
+
         PolylineOptions options = new PolylineOptions().
                 geodesic(true).
                 color(ContextCompat.getColor(this, R.color.red_lt));
         if (resultList != null) options.addAll(resultList);
         if (list != null) options.addAll(list);
-        mPolyline = mMap.addPolyline(options);
+        mPolylines.set(mPolylines.size() - 1, mMap.addPolyline(options));
 
     }
 
@@ -253,41 +271,50 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         mPathInfo = new PathInfo(list);
     }
 
-    private void addPointsToPathInfo(List<MapPoint> list) {
-        mPathInfo.addPointInfo(list);
-    }
 
     private void addOnePoint(MapPoint newPoint) {
-        addPointsToPathInfo(Collections.singletonList(newPoint));
+        mPathInfo.addPointInfo(newPoint);
         updateInfoFragmentIfExists();
         updatePolyline(Collections.singletonList(newPoint.toLatLng()));
     }
 
     private void updateInfoFragmentIfExists(){
         if (mInfoFragment != null)
-            if (mPathInfo != null) mInfoFragment.updateFields(mPathInfo.getStartTime(),
-                mPathInfo.getCurTime(), mPathInfo.getDistance(), mPathInfo.getCurSpeed(),
+            if (mPathInfo != null) mInfoFragment.updateFields(mPathInfo.getTotalTime(),
+                    mPathInfo.getDistance(),
+                    mPathInfo.getCurSpeed(),
                 mPathInfo.getAvgSpeed());
             else mInfoFragment.dropAllFields();
     }
 
     private void addListOfPoints(List<MapPoint> pointList) {
-        List<LatLng> latlngList = new ArrayList<>();
+        List<List<MapPoint>> pathPointsList = new ArrayList<>();
+
+        List<MapPoint> polylineList = new ArrayList<>();
         for (MapPoint point : pointList) {
-            Log.i(TAG,"timestamp:"+point.getTime());
-            latlngList.add(point.toLatLng());
+            polylineList.add(point);
+            if (point.isEndPoint()) {
+                pathPointsList.add(polylineList);
+                polylineList = new ArrayList<>();
+            }
         }
+        if (!polylineList.isEmpty()) pathPointsList.add(polylineList);
+
         updateInfoFragmentIfExists();
-        updatePolyline(latlngList);
+        Log.i(TAG, "path point size :" + pathPointsList.size());
+        for (List<MapPoint> list : pathPointsList) {
+            Log.i(TAG, "list size: " + list.size());
+            addPolyline(MapPoint.convertListToLatLng(list));
+            for (MapPoint point : list) {
+                if (point.isStartPoint()) setStartPoint(point.toLatLng());
+                if (point.isEndPoint()) setEndPoint(point.toLatLng());
+            }
+        }
     }
 
     private void setNewPoint(MapPoint newPoint) {
         setUpMapIfNeeded();
         addOnePoint(newPoint);
-       /* mMap.addPolyline(new PolylineOptions().geodesic(true)
-                .color(ContextCompat.getColor(this, R.color.red_lt))
-                .add(new LatLng(last.getLattitude(), last.getLongitude()))
-                .add(new LatLng(newPoint.getLattitude(), newPoint.getLongitude())));*/
     }
 
     @Override
@@ -305,7 +332,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         }
         if (!points.isEmpty()) {
             initPathInfo(points);
-            setStartPoint(points.get(0));
             addListOfPoints(points);
         }
     }
@@ -314,17 +340,17 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onStartPoint(MapPoint startPoint) {
         if (!isShowingSaved) {
             setUpMapIfNeeded();
-            clearMap();
-            initPathInfo(Collections.singletonList(startPoint));
-            setStartPoint(startPoint);
+            //clearMap();
+            if (mPathInfo == null) initPathInfo(Collections.singletonList(startPoint));
+            setStartPoint(startPoint.toLatLng());
+            addPolyline(Collections.singletonList(startPoint.toLatLng()));
         }
     }
 
-    private void setStartPoint(MapPoint startPoint) {
+    private void setStartPoint(LatLng startPoint) {
         mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(startPoint.getLattitude(), startPoint.getLongitude()))
+                .position(startPoint)
                 .title("Start"));
-        updatePolyline(Collections.singletonList(startPoint.toLatLng()));
     }
 
 
@@ -337,44 +363,59 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         isShowingSaved = false;
         mControlFragment.showCurrentPathButton(false);
         mNavigationDrawerFragment.invalidateSelection();
+        updateInfoFragmentIfExists();
     }
 
 
     private void switchInfoFragment(){
         if (mInfoFragment == null) {
-            mInfoFragment = new InfoFragment();
-            if (mPathInfo != null) {
-                Bundle bundle = new Bundle();
-                bundle.putLong(InfoFragment.ARG_CUR_TIME, mPathInfo.getCurTime());
-                bundle.putLong(InfoFragment.ARG_START_TIME, mPathInfo.getStartTime());
-                bundle.putDouble(InfoFragment.ARG_CUR_SPEED, mPathInfo.getCurSpeed());
-                bundle.putDouble(InfoFragment.ARG_AVG_SPEED, mPathInfo.getAvgSpeed());
-                bundle.putDouble(InfoFragment.ARG_DISTANCE, mPathInfo.getDistance());
-                mInfoFragment.setArguments(bundle);
-            }
-            getSupportFragmentManager()
-                    .beginTransaction()
-                            //.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .setCustomAnimations(R.anim.anim_info_in,
-                            R.anim.anim_info_out)
-                    .add(R.id.info_fragment, mInfoFragment, INFO_FRAGMENT_TAG)
-                    .commit();
+            setInfoFragment();
         }
         else {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(R.anim.anim_info_in,
-                            R.anim.anim_info_out)
-                    .remove(mInfoFragment)
-                    .commit();
-            mInfoFragment = null;
+            removeInfoFragment();
         }
+    }
 
+    public void setInfoFragment() {
+        mInfoFragment = new InfoFragment();
+        if (mPathInfo != null) {
+            Bundle bundle = new Bundle();
+            bundle.putLong(InfoFragment.ARG_TOTAL_TIME, mPathInfo.getTotalTime());
+            bundle.putDouble(InfoFragment.ARG_CUR_SPEED, mPathInfo.getCurSpeed());
+            bundle.putDouble(InfoFragment.ARG_AVG_SPEED, mPathInfo.getAvgSpeed());
+            bundle.putDouble(InfoFragment.ARG_DISTANCE, mPathInfo.getDistance());
+            mInfoFragment.setArguments(bundle);
+        }
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.anim_info_in,
+                        R.anim.anim_info_out)
+                .add(R.id.info_fragment, mInfoFragment, INFO_FRAGMENT_TAG)
+                .commit();
+    }
+
+    public void removeInfoFragment() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.anim_info_in,
+                        R.anim.anim_info_out)
+                .remove(mInfoFragment)
+                .commit();
+        mInfoFragment = null;
     }
 
     @Override
     public void onEndPoint(MapPoint endPoint) {
+        mPathInfo.pauseAndSetLastPointAsEnd();
+        if (!isShowingSaved)
+            setEndPoint(endPoint.toLatLng());
+    }
 
+    private void setEndPoint(LatLng endPoint) {
+        mMap.addMarker(new MarkerOptions()
+                .position(endPoint)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                .title("End"));
     }
 
     @Override
@@ -403,6 +444,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     @Override
     public void onCurrentButtonClick() {
         disableWatchingSavedPathMode();
+
     }
 
     @Override
@@ -441,5 +483,16 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     @Override
     public void onFail() {
         Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_SHORT).show();
+    }
+
+
+    @Override
+    public void onMyLocationChange(Location location) {
+        CameraPosition position = new CameraPosition.Builder()
+                .target(new LatLng(location.getLatitude(), location.getLongitude()))
+                .zoom(12)
+                .build();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
+        mMap.setOnMyLocationChangeListener(null);
     }
 }

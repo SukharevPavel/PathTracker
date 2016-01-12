@@ -7,6 +7,9 @@ import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * That class implements ORM representation of all point, where user was.
  */
@@ -19,6 +22,8 @@ public class MapPoint {
     public final static String COLUMN_DATE = "date";
     public final static String COLUMN_SPEED = "speed";
     public final static String COLUMN_HAS_SPEED = "has_speed";
+    public final static String COLUMN_IS_START_POINT = "is_start_point";
+    public final static String COLUMN_IS_END_POINT = "is_end";
     @DatabaseField(foreign = true)
     MapPath path;
     @DatabaseField(generatedId = true)
@@ -33,6 +38,10 @@ public class MapPoint {
     private double speed;
     @DatabaseField(dataType = DataType.BOOLEAN, columnName = COLUMN_HAS_SPEED)
     private boolean hasSpeed;
+    @DatabaseField(dataType = DataType.BOOLEAN, columnName = COLUMN_IS_START_POINT)
+    private boolean isStartPoint;
+    @DatabaseField(dataType = DataType.BOOLEAN, columnName = COLUMN_IS_END_POINT)
+    private boolean isEndPoint;
 
     public MapPoint(double loc_x, double loc_y, long time) {
         this.lattitude = loc_x;
@@ -52,6 +61,29 @@ public class MapPoint {
 
     MapPoint() {
 
+    }
+
+    public static List<LatLng> convertListToLatLng(Iterable<MapPoint> pointList) {
+        ArrayList<LatLng> list = new ArrayList<>();
+        for (MapPoint point : pointList)
+            list.add(point.toLatLng());
+        return list;
+    }
+
+    public boolean isStartPoint() {
+        return isStartPoint;
+    }
+
+    public void setIsStartPoint(boolean isStartPoint) {
+        this.isStartPoint = isStartPoint;
+    }
+
+    public boolean isEndPoint() {
+        return isEndPoint;
+    }
+
+    public void setIsEndPoint(boolean isEndPoint) {
+        this.isEndPoint = isEndPoint;
     }
 
     public boolean isHasSpeed() {

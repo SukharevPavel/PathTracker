@@ -17,8 +17,8 @@ public class InfoFragment extends Fragment {
 
     public final static String TAG = "InfoFragment.java";
 
-    public final static String ARG_START_TIME = "start_time";
-    public final static String ARG_CUR_TIME = "cur_time";
+
+    public final static String ARG_TOTAL_TIME = "cur_time";
     public final static String ARG_AVG_SPEED = "avg_speed";
     public final static String ARG_CUR_SPEED = "cur_speed";
     public final static String ARG_DISTANCE = "distance";
@@ -33,8 +33,8 @@ public class InfoFragment extends Fragment {
 
     private Measurement mUnits;
 
-    private long startTime;
-    private long curTime;
+
+    private long totalTime;
     private double dist;
     private double curSpeed;
     private double avgSpeed;
@@ -70,8 +70,7 @@ public class InfoFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             Log.i(TAG, "init");
-            startTime = bundle.getLong(ARG_START_TIME);
-            curTime = bundle.getLong(ARG_CUR_TIME);
+            totalTime = bundle.getLong(ARG_TOTAL_TIME);
             dist = bundle.getDouble(ARG_DISTANCE);
             curSpeed = bundle.getDouble(ARG_CUR_SPEED);
             avgSpeed = bundle.getDouble(ARG_AVG_SPEED);
@@ -81,19 +80,17 @@ public class InfoFragment extends Fragment {
 
     private void setTextFields(){
         //mTimeText.setText(String.valueOf(format.format(new Date(curTime - startTime))));
-        mTimeText.setNewTime(curTime - startTime);
+        mTimeText.setNewTime(totalTime);
         mDistText.setText(mUnits.formatMeters(dist));
         mSpeedText.setText(mUnits.formatSpeed(curSpeed));
         mAvgSpeedText.setText(mUnits.formatSpeed(avgSpeed));
 
     }
 
-    public void updateFields(long startTime, long curTime, double dist, double curSpeed,
+    public void updateFields(long totalTime, double dist, double curSpeed,
                               double avgSpeed){
         Log.i(TAG, "update");
-        Log.i(TAG, "start time = " + startTime + "\n curTime = " + curTime);
-        this.startTime = startTime;
-        this.curTime = curTime;
+        this.totalTime = totalTime;
         this.dist = dist;
         this.curSpeed = curSpeed;
         this.avgSpeed = avgSpeed;
@@ -101,7 +98,7 @@ public class InfoFragment extends Fragment {
     }
 
     public void dropAllFields() {
-        this.avgSpeed = this.curSpeed = this.dist = this.curTime = this.startTime = NO_DATA;
+        this.avgSpeed = this.curSpeed = this.dist = this.totalTime = NO_DATA;
         setTextFields();
     }
 

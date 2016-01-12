@@ -71,7 +71,7 @@ public class Measurement {
     public void appendTimeSuffix(StringBuilder builder) {
 
         String unit = mPreferences.getString(mContext.getString(R.string.pref_key_units_speed),
-                mContext.getString(R.string.pref_key_units_distance_default));
+                mContext.getString(R.string.pref_key_units_speed_default));
         String[] unitArray = mContext.getResources().getStringArray(R.array.array_speed_units);
 
         if (unit.equals(unitArray[HOUR_POSITION_IN_STRING_ARRAY_RESOURCE])) {
