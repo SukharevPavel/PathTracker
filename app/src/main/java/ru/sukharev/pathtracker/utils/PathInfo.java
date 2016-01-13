@@ -1,6 +1,7 @@
 package ru.sukharev.pathtracker.utils;
 
 import android.location.Location;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import ru.sukharev.pathtracker.utils.orm.MapPoint;
  * Class that store info about current showing path
  */
 public class PathInfo {
+    private static final String TAG = "PathInfo.java";
 
     private long mStartTime;
     private long mCurTime;
@@ -39,6 +41,7 @@ public class PathInfo {
         curSpeed = point.getSpeed();
         avgSpeed = point.getSpeed();
         mDistance = 0d;
+        mAwaitingTime = 0;
     }
 
     private double findDistance(MapPoint point1, MapPoint point2) {
@@ -59,6 +62,9 @@ public class PathInfo {
 
     public void addPointInfo(MapPoint point){
 
+        checkIsStopped(point);
+
+        if (point.isEndPoint()) isPaused = true;
 
         double curDist = findDistance(mPoints.get(mPoints.size() - 1), point);
         mDistance += curDist;
@@ -68,7 +74,7 @@ public class PathInfo {
         findAvgSpeed(point.getTime(), curSpeed);
         mCurTime = point.getTime();
 
-        checkIsStopped(point);
+        Log.i(TAG, "awating time = " + getAwaitingTime());
 
         mPoints.add(point);
     }

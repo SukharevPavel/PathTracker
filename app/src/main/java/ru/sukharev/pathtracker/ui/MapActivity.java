@@ -342,6 +342,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             setUpMapIfNeeded();
             //clearMap();
             if (mPathInfo == null) initPathInfo(Collections.singletonList(startPoint));
+            else mPathInfo.addPointInfo(startPoint);
             setStartPoint(startPoint.toLatLng());
             addPolyline(Collections.singletonList(startPoint.toLatLng()));
         }
@@ -406,9 +407,10 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onEndPoint(MapPoint endPoint) {
-        mPathInfo.pauseAndSetLastPointAsEnd();
-        if (!isShowingSaved)
+        if (!isShowingSaved) {
+            mPathInfo.pauseAndSetLastPointAsEnd();
             setEndPoint(endPoint.toLatLng());
+        }
     }
 
     private void setEndPoint(LatLng endPoint) {
