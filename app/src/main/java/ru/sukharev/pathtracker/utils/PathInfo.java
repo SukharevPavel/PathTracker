@@ -69,10 +69,12 @@ public class PathInfo {
         double curDist = findDistance(mPoints.get(mPoints.size() - 1), point);
         mDistance += curDist;
 
-        curSpeed = (point.isHasSpeed() ? point.getSpeed() :
+        curSpeed = (point.isHasSpeed() && !point.isStartPoint() ? point.getSpeed() :
                 findPreciseAvgSpeed(curDist, TimeUnit.MILLISECONDS.toSeconds(point.getTime() - getCurTime())));
-        findAvgSpeed(point.getTime(), curSpeed);
+        Log.i(TAG, "cur speed = " + curSpeed);
         mCurTime = point.getTime();
+        findAvgSpeed(point.getTime(), curSpeed);
+
 
         Log.i(TAG, "awating time = " + getAwaitingTime());
 
@@ -95,14 +97,21 @@ public class PathInfo {
     }
 
     private double findPreciseAvgSpeed(double dist, long time) {
+        Log.i(TAG, "find precise avg speed");
+        Log.i(TAG, "dist = " + dist + " time = " + time);
         if (time == 0d) return 0d;
         return dist / time;
     }
 
     private void findAvgSpeed(long time, double speed) {
-        avgSpeed = (getAvgSpeed() * (getCurTime() - getStartTime() - getAwaitingTime()) +
+       /* avgSpeed = (getAvgSpeed() * (getCurTime() - getStartTime() - getAwaitingTime()) +
                 (time - getCurTime()) * speed)
-                / (time - getStartTime() - getAwaitingTime());
+                / (time - getStartTime() - getAwaitingTime());*/
+        Log.i(TAG, "curtime " + getCurTime() + " awaiting time = " + getAwaitingTime() + " startTime =" + getStartTime());
+        Log.i(TAG, "total time = " + getTotalTime());
+        Log.i(TAG, "mDistance = " + mDistance);
+        avgSpeed = mDistance / TimeUnit.MILLISECONDS.toSeconds(getTotalTime());
+        Log.i(TAG, "avg speed = " + avgSpeed);
     }
 
 
