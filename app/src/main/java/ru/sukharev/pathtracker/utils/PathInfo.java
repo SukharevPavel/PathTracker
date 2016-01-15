@@ -1,7 +1,6 @@
 package ru.sukharev.pathtracker.utils;
 
 import android.location.Location;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,12 +70,9 @@ public class PathInfo {
 
         curSpeed = (point.isHasSpeed() && !point.isStartPoint() ? point.getSpeed() :
                 findPreciseAvgSpeed(curDist, TimeUnit.MILLISECONDS.toSeconds(point.getTime() - getCurTime())));
-        Log.i(TAG, "cur speed = " + curSpeed);
         mCurTime = point.getTime();
-        findAvgSpeed(point.getTime(), curSpeed);
+        findAvgSpeed();
 
-
-        Log.i(TAG, "awating time = " + getAwaitingTime());
 
         mPoints.add(point);
     }
@@ -97,21 +93,12 @@ public class PathInfo {
     }
 
     private double findPreciseAvgSpeed(double dist, long time) {
-        Log.i(TAG, "find precise avg speed");
-        Log.i(TAG, "dist = " + dist + " time = " + time);
         if (time == 0d) return 0d;
         return dist / time;
     }
 
-    private void findAvgSpeed(long time, double speed) {
-       /* avgSpeed = (getAvgSpeed() * (getCurTime() - getStartTime() - getAwaitingTime()) +
-                (time - getCurTime()) * speed)
-                / (time - getStartTime() - getAwaitingTime());*/
-        Log.i(TAG, "curtime " + getCurTime() + " awaiting time = " + getAwaitingTime() + " startTime =" + getStartTime());
-        Log.i(TAG, "total time = " + getTotalTime());
-        Log.i(TAG, "mDistance = " + mDistance);
+    private void findAvgSpeed() {
         avgSpeed = mDistance / TimeUnit.MILLISECONDS.toSeconds(getTotalTime());
-        Log.i(TAG, "avg speed = " + avgSpeed);
     }
 
 

@@ -300,7 +300,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         }
         if (!polylineList.isEmpty()) pathPointsList.add(polylineList);
 
-        updateInfoFragmentIfExists();
         Log.i(TAG, "path point size :" + pathPointsList.size());
         for (List<MapPoint> list : pathPointsList) {
             Log.i(TAG, "list size: " + list.size());
@@ -334,6 +333,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             initPathInfo(points);
             addListOfPoints(points);
         }
+        updateInfoFragmentIfExists();
     }
 
     @Override
@@ -364,12 +364,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         isShowingSaved = false;
         mControlFragment.showCurrentPathButton(false);
         mNavigationDrawerFragment.invalidateSelection();
-        updateInfoFragmentIfExists();
     }
 
 
     private void switchInfoFragment(){
-        if (mInfoFragment == null) {
+        if (getSupportFragmentManager().findFragmentByTag(INFO_FRAGMENT_TAG) == null) {
             setInfoFragment();
         }
         else {

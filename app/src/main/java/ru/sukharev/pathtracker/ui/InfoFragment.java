@@ -56,7 +56,17 @@ public class InfoFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_info, container, false);
 
-
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .setCustomAnimations(R.anim.anim_info_in,
+                                R.anim.anim_info_out)
+                        .remove(InfoFragment.this)
+                        .commit();
+            }
+        });
         mTimeText = (TimerView) v.findViewById(R.id.info_timer);
         mDistText = (TextView) v.findViewById(R.id.info_dist);
         mSpeedText = (TextView) v.findViewById(R.id.info_cur_speed);
