@@ -13,8 +13,6 @@ import ru.sukharev.pathtracker.provider.DatabaseHelper;
  */
 public class OrmLoader extends AsyncTaskLoader<List<?>> {
 
-    public final static int GET_ALL_PATHS = 1;
-    public final static int GET_POINT_BY_PATH = 2;
     DatabaseHelper mHelper;
     private String mTable;
     private String mSelection;

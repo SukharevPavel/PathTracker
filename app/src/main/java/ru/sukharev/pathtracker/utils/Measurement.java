@@ -111,7 +111,7 @@ public class Measurement {
         return metre;
     }
 
-    public double convertSeconds(double unitPerSec) {
+    public double convertPerSeconds(double unitPerSec) {
         String unit = mPreferences.getString(mContext.getString(R.string.pref_key_units_speed),
                 mContext.getString(R.string.pref_key_units_speed_default));
         String[] unitArray = mContext.getResources().getStringArray(R.array.array_speed_units);
@@ -130,6 +130,34 @@ public class Measurement {
         return unitPerSec;
     }
 
+    public double convertSeconds(double seconds) {
+        String unit = mPreferences.getString(mContext.getString(R.string.pref_key_units_speed),
+                mContext.getString(R.string.pref_key_units_speed_default));
+        String[] unitArray = mContext.getResources().getStringArray(R.array.array_speed_units);
+
+        if (unit.equals(unitArray[HOUR_POSITION_IN_STRING_ARRAY_RESOURCE])) {
+            return seconds / SECONDS_IN_HOUR;
+        }
+        if (unit.equals(unitArray[MINUTE_POSITION_IN_STRING_ARRAY_RESOURCE])) {
+            return seconds / SECONDS_IN_MINUTE;
+
+        }
+        if (unit.equals(unitArray[SECOND_POSITION_IN_STRING_ARRAY_RESOURCE])) {
+            return Math.round(seconds);
+        }
+
+        return seconds;
+    }
+
+    public String formatTime(double seconds) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(convertSeconds(seconds));
+        builder.append(SPACE);
+        appendTimeSuffix(builder);
+        return builder.toString();
+    }
+
+
     public String formatSpeed(double metrePerSec) {
 
 
@@ -137,7 +165,7 @@ public class Measurement {
         //Minutes
         //Seconds
         StringBuilder builder = new StringBuilder();
-        builder.append(convertSeconds(convertMeters(metrePerSec)));
+        builder.append(convertPerSeconds(convertMeters(metrePerSec)));
         builder.append(SPACE);
         appendDistanceSuffix(builder);
         builder.append(SLASH);

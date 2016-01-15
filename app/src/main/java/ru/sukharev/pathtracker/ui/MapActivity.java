@@ -16,7 +16,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,6 +34,8 @@ import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.ForeignCollection;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -56,6 +57,10 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         ClearDialogFragment.DialogClearListener, GoogleMap.OnMyLocationChangeListener {
 
     private final static String TAG = "MapActivity.java";
+
+    private final static DateFormat markerFormat = SimpleDateFormat.getTimeInstance();
+
+    private final static float STANDARD_ZOOM = 12;
 
     private final static String PATH_NAMING_FRAGMENT_TAG = "path_naming_fragment";
     private final static String CLEAR_FRAGMENT_TAG = "clear_fragment";
@@ -182,6 +187,9 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
                     .getMap();
             setMapType();
             mPolylines = new ArrayList<>();
+            mMap.getUiSettings().setMapToolbarEnabled(false);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
+            mMap.getUiSettings().setCompassEnabled(true);
             mMap.setMyLocationEnabled(true);
 
         }
@@ -300,13 +308,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         }
         if (!polylineList.isEmpty()) pathPointsList.add(polylineList);
 
-        Log.i(TAG, "path point size :" + pathPointsList.size());
         for (List<MapPoint> list : pathPointsList) {
-            Log.i(TAG, "list size: " + list.size());
             addPolyline(MapPoint.convertListToLatLng(list));
             for (MapPoint point : list) {
-                if (point.isStartPoint()) setStartPoint(point.toLatLng());
-                if (point.isEndPoint()) setEndPoint(point.toLatLng());
+                if (point.isStartPoint()) setStartPoint(point);
+                if (point.isEndPoint()) setEndPoint(point);
             }
         }
     }
@@ -332,6 +338,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         if (!points.isEmpty()) {
             initPathInfo(points);
             addListOfPoints(points);
+            moveCameraToPosition(points.get(points.size() - 1).toLatLng());
         }
         updateInfoFragmentIfExists();
     }
@@ -343,15 +350,25 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             //clearMap();
             if (mPathInfo == null) initPathInfo(Collections.singletonList(startPoint));
             else mPathInfo.addPointInfo(startPoint);
-            setStartPoint(startPoint.toLatLng());
+            setStartPoint(startPoint);
             addPolyline(Collections.singletonList(startPoint.toLatLng()));
         }
     }
 
-    private void setStartPoint(LatLng startPoint) {
+    private void setStartPoint(MapPoint startPoint) {
+        String title = markerFormat.format(startPoint.getTime());
         mMap.addMarker(new MarkerOptions()
-                .position(startPoint)
-                .title("Start"));
+                .position(startPoint.toLatLng())
+                .title(title));
+    }
+
+    public void moveCameraToPosition(LatLng loc) {
+
+        CameraPosition.Builder builder = new CameraPosition.Builder()
+                .target(loc);
+        if (mMap.getCameraPosition().zoom < STANDARD_ZOOM) builder.zoom(STANDARD_ZOOM);
+        else builder.zoom(mMap.getCameraPosition().zoom);
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(builder.build()));
     }
 
 
@@ -408,15 +425,16 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onEndPoint(MapPoint endPoint) {
         if (!isShowingSaved) {
             mPathInfo.pauseAndSetLastPointAsEnd();
-            setEndPoint(endPoint.toLatLng());
+            setEndPoint(endPoint);
         }
     }
 
-    private void setEndPoint(LatLng endPoint) {
+    private void setEndPoint(MapPoint endPoint) {
+        String title = markerFormat.format(endPoint.getTime());
         mMap.addMarker(new MarkerOptions()
-                .position(endPoint)
+                .position(endPoint.toLatLng())
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                .title("End"));
+                .title(title));
     }
 
     @Override
@@ -487,13 +505,10 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
 
+    //This callback works only first time when user location got
     @Override
     public void onMyLocationChange(Location location) {
-        CameraPosition position = new CameraPosition.Builder()
-                .target(new LatLng(location.getLatitude(), location.getLongitude()))
-                .zoom(12)
-                .build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
+        moveCameraToPosition(new LatLng(location.getLatitude(), location.getLongitude()));
         mMap.setOnMyLocationChangeListener(null);
     }
 }
