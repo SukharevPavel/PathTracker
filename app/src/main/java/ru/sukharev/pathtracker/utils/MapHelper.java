@@ -60,7 +60,9 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     private void stopTracking() {
         isServiceStarted = false;
-        mListener.onEndPoint(setEndPoint());
+        if (!mPoints.isEmpty()) {
+            mListener.onEndPoint(setEndPoint());
+        }
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
         mListener.onServiceStop();
@@ -106,17 +108,20 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     }
 
     public void clearData() {
+        isWaitingForStartPoint = true;
         mPoints.clear();
     }
 
     public void saveToDatabase(String name, double distance, double avgSpeed) {
-        setEndPoint();
-        MapPath mapPath = new MapPath(name,
-                mPoints.get(0).getTime(),
-                mPoints.get(mPoints.size() - 1).getTime(),
-                distance,
-                avgSpeed);
-        new AsynkSaveToDatabaseTask().execute(mapPath);
+        if (!mPoints.isEmpty()) {
+            setEndPoint();
+            MapPath mapPath = new MapPath(name,
+                    mPoints.get(0).getTime(),
+                    mPoints.get(mPoints.size() - 1).getTime(),
+                    distance,
+                    avgSpeed);
+            new AsynkSaveToDatabaseTask().execute(mapPath);
+        } else mSQLListener.onFail();
     }
 
     public boolean isServiceStarted() {
