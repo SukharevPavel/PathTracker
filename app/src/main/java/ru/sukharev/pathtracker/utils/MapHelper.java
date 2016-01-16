@@ -114,13 +114,15 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     public void saveToDatabase(String name, double distance, double avgSpeed) {
         if (!mPoints.isEmpty()) {
-            setEndPoint();
+
             MapPath mapPath = new MapPath(name,
                     mPoints.get(0).getTime(),
                     mPoints.get(mPoints.size() - 1).getTime(),
                     distance,
                     avgSpeed);
             new AsynkSaveToDatabaseTask().execute(mapPath);
+
+
         } else mSQLListener.onFail();
     }
 
@@ -144,6 +146,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         notifyUI(newMapPoint);
         addPointToList(newMapPoint);
     }
+
 
     private MapPoint setEndPoint() {
         MapPoint point = mPoints.get(mPoints.size() - 1);
@@ -265,8 +268,21 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
         private void saveAllPoints() throws SQLException {
             DatabaseHelper.PointDAO dao = mDatabaseHelper.getPointDAO();
-            for (MapPoint mapPoint : mPoints)
+            MapPoint endPoint = mPoints.get(mPoints.size() - 1);
+            boolean flagOfLastPoint = false;
+            for (MapPoint mapPoint : mPoints) {
+                //to make a nice saved path with borders, where it end and where it stops even
+                //if we save the path while tracking is not over
+                if (mapPoint.equals(endPoint) && !mapPoint.isEndPoint()) {
+                    flagOfLastPoint = true;
+                    mapPoint.setIsEndPoint(true);
+                }
                 dao.create(mapPoint);
+                if (flagOfLastPoint) {
+                    flagOfLastPoint = false;
+                    mapPoint.setIsEndPoint(false);
+                }
+            }
         }
     }
 

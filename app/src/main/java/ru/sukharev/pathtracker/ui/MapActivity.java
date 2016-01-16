@@ -484,6 +484,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     @Override
     public void onClear() {
         clearMap();
+        disableWatchingSavedPathMode();
         mControlFragment.clearData();
         updateInfoFragmentIfExists();
     }
