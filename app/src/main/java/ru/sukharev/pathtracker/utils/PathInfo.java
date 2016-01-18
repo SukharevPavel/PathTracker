@@ -65,12 +65,18 @@ public class PathInfo {
 
         if (point.isEndPoint()) isPaused = true;
 
-        double curDist = findDistance(mPoints.get(mPoints.size() - 1), point);
-        mDistance += curDist;
+        double curDist = 0;
 
-        curSpeed = (point.isHasSpeed() && !point.isStartPoint() ? point.getSpeed() :
+        if (!point.isStartPoint()) {
+
+            curDist = findDistance(mPoints.get(mPoints.size() - 1), point);
+            mDistance += curDist;
+        }
+
+        curSpeed = (point.isHasSpeed() ? point.getSpeed() :
                 findPreciseAvgSpeed(curDist, TimeUnit.MILLISECONDS.toSeconds(point.getTime() - getCurTime())));
         mCurTime = point.getTime();
+
         findAvgSpeed();
 
 

@@ -4,19 +4,15 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 
 /**
- * Created by hpc on 12/27/15.
+ * View to show tracking time in info fragment.
  */
 public class TimerView extends TextView {
 
-    private final static int ONE_HOUR = 3600000;
-    private DateFormat shortFormat = new SimpleDateFormat("mm:ss");
-    private DateFormat longFormat = new SimpleDateFormat("hh:mm:ss");
+
     private long mTime;
 
     public TimerView(Context context, AttributeSet attrs) {
@@ -26,12 +22,29 @@ public class TimerView extends TextView {
 
     public void setNewTime(long time) {
         mTime = time;
-        Date date = new Date(time);
-        if (time < ONE_HOUR)
-            setText(shortFormat.format(date));
-        else
-            setText(longFormat.format(date));
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(time) % Commons.SECONDS_IN_MINUTE;
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(time) % Commons.MINUTES_IN_HOUR;
+        long hours = TimeUnit.MILLISECONDS.toHours(time);
+        StringBuilder builder = new StringBuilder();
+        if (time < Commons.MILLISECONDS_IN_ONE_HOUR) {
+            builder.append(formatToTwoDigits(minutes));
+            builder.append(Commons.COLON);
+            builder.append(formatToTwoDigits(seconds));
+        } else {
+            builder.append(hours);
+            builder.append(Commons.COLON);
+            builder.append(formatToTwoDigits(minutes));
+            builder.append(Commons.COLON);
+            builder.append(formatToTwoDigits(seconds));
+        }
+        setText(builder.toString());
     }
+
+    public String formatToTwoDigits(long value) {
+        if (value < 10) return String.valueOf(0) + String.valueOf(value);
+        else return String.valueOf(value);
+    }
+
 
     public long getTime() {
         return mTime;

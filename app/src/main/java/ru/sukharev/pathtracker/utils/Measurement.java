@@ -11,16 +11,7 @@ import ru.sukharev.pathtracker.R;
  */
 public class Measurement {
 
-    private final static String TAG = "Measurement.java";
 
-    private final static String SPACE = " ";
-    private final static String SLASH = "/";
-    private final static String DOT = ".";
-    private final static double METRES_IN_KILOMETRE = 1000;
-    private final static double METRES_IN_MILE = 1609.344;
-    private final static double METRES_IN_NAUTICAL_MILE = 1852;
-    private final static double SECONDS_IN_HOUR = 3600;
-    private final static double SECONDS_IN_MINUTE = 60;
     private final static int KM_POSITION_IN_STRING_ARRAY_RESOURCE = 0;
     private final static int MI_POSITION_IN_STRING_ARRAY_RESOURCE = 1;
     private final static int M_POSITION_IN_STRING_ARRAY_RESOURCE = 2;
@@ -40,9 +31,9 @@ public class Measurement {
     public String formatMeters(double metre) {
         StringBuilder builder = new StringBuilder();
         builder.append(convertMeters(metre));
-        builder.append(SPACE);
+        builder.append(Commons.SPACE);
         appendDistanceSuffix(builder);
-        builder.append(DOT);
+        builder.append(Commons.DOT);
         return builder.toString();
 
     }
@@ -96,17 +87,17 @@ public class Measurement {
         //Metres
         //Nautical miles
         if (unit.equals(unitArray[KM_POSITION_IN_STRING_ARRAY_RESOURCE])) {
-            return metre / METRES_IN_KILOMETRE;
+            return metre / Commons.METRES_IN_KILOMETRE;
         }
         if (unit.equals(unitArray[MI_POSITION_IN_STRING_ARRAY_RESOURCE])) {
-            return metre / METRES_IN_MILE;
+            return metre / Commons.METRES_IN_MILE;
 
         }
         if (unit.equals(unitArray[M_POSITION_IN_STRING_ARRAY_RESOURCE])) {
             return metre;
         }
         if (unit.equals(unitArray[NM_POSITION_IN_STRING_ARRAY_RESOURCE])) {
-            return metre / METRES_IN_NAUTICAL_MILE;
+            return metre / Commons.METRES_IN_NAUTICAL_MILE;
         }
         return metre;
     }
@@ -117,10 +108,10 @@ public class Measurement {
         String[] unitArray = mContext.getResources().getStringArray(R.array.array_speed_units);
 
         if (unit.equals(unitArray[HOUR_POSITION_IN_STRING_ARRAY_RESOURCE])) {
-            return unitPerSec * SECONDS_IN_HOUR;
+            return unitPerSec * Commons.SECONDS_IN_HOUR;
         }
         if (unit.equals(unitArray[MINUTE_POSITION_IN_STRING_ARRAY_RESOURCE])) {
-            return unitPerSec * SECONDS_IN_MINUTE;
+            return unitPerSec * Commons.SECONDS_IN_MINUTE;
 
         }
         if (unit.equals(unitArray[SECOND_POSITION_IN_STRING_ARRAY_RESOURCE])) {
@@ -136,10 +127,10 @@ public class Measurement {
         String[] unitArray = mContext.getResources().getStringArray(R.array.array_speed_units);
 
         if (unit.equals(unitArray[HOUR_POSITION_IN_STRING_ARRAY_RESOURCE])) {
-            return seconds / SECONDS_IN_HOUR;
+            return seconds / Commons.SECONDS_IN_HOUR;
         }
         if (unit.equals(unitArray[MINUTE_POSITION_IN_STRING_ARRAY_RESOURCE])) {
-            return seconds / SECONDS_IN_MINUTE;
+            return seconds / Commons.SECONDS_IN_MINUTE;
 
         }
         if (unit.equals(unitArray[SECOND_POSITION_IN_STRING_ARRAY_RESOURCE])) {
@@ -152,7 +143,7 @@ public class Measurement {
     public String formatTime(double seconds) {
         StringBuilder builder = new StringBuilder();
         builder.append(convertSeconds(seconds));
-        builder.append(SPACE);
+        builder.append(Commons.SPACE);
         appendTimeSuffix(builder);
         return builder.toString();
     }
@@ -166,9 +157,9 @@ public class Measurement {
         //Seconds
         StringBuilder builder = new StringBuilder();
         builder.append(convertPerSeconds(convertMeters(metrePerSec)));
-        builder.append(SPACE);
+        builder.append(Commons.SPACE);
         appendDistanceSuffix(builder);
-        builder.append(SLASH);
+        builder.append(Commons.SLASH);
         appendTimeSuffix(builder);
         return builder.toString();
 
