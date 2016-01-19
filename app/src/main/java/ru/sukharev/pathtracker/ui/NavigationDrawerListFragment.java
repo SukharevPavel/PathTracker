@@ -13,6 +13,7 @@ import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -20,6 +21,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +31,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
@@ -46,6 +51,8 @@ interface OnRecyclerViewClickListener {
 interface ViewHolderContextMenuItemListener {
 
     void onContextMenuSelect(MapPath path);
+
+    void onCheckedChangeListener(MapPath path, boolean flag);
 
 }
 
@@ -100,6 +107,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         mRecyclerView.setAdapter(mAdapter);
 
         mDrawerToolbar = (Toolbar) v.findViewById(R.id.drawer_toolbar);
+        setUpDrawerToolbar();
         //setListAdapter(mAdapter);
         return v;
     }
@@ -107,7 +115,38 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     private void setUpDrawerToolbar() {
 
         mDrawerToolbar.setTitle(getString(R.string.navigation_drawer_toolbar));
+        mDrawerToolbar.inflateMenu(R.menu.menu_navigation_drawer);
+        mDrawerToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_delete_selected: {
+                        deleteSelected();
+                        return true;
+                    }
+                    default:
+                        return false;
 
+                }
+            }
+        });
+
+    }
+
+    private void deleteSelected() {
+        Log.i(TAG, "delete selected");
+        Map<MapPath, Boolean> map = mAdapter.getCheckedMap();
+        try {
+            for (MapPath path : map.keySet()) {
+                Log.i(TAG, "Path " + path.getName() + " has flag " + map.get(path));
+                if (map.get(path))
+                    deletePathFromDatabase(path);
+                mAdapter.remove(path);
+            }
+        } catch (SQLException e) {
+            Toast.makeText(getContext(), getString(R.string.error_delete_path), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -115,7 +154,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         super.onActivityCreated(savedInstanceState);
         setRetainInstance(true);
         //  registerForContextMenu(getListView());
-        getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
+        reloadList();
         mPathListener = (NavigationDrawerListener) getActivity();
         // getListView().setOnItemClickListener(mItemListener);
         selectItem(mSelectedItem);
@@ -272,6 +311,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         private MenuInflater mMenuInflater;
         private OnRecyclerViewClickListener mListener;
         private MapPath mSelectedPath;
+        private Map<MapPath, Boolean> isChecked;
 
         public PathAdapter(Context ctx, List<MapPath> list, OnRecyclerViewClickListener listener) {
             mObjects = list;
@@ -279,7 +319,15 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             mListener = listener;
             getListSettings(getContext());
             mMenuInflater = new MenuInflater(getContext());
+            initCheckedMap();
         }
+
+        public void initCheckedMap() {
+            isChecked = new HashMap<>(mObjects.size());
+            for (MapPath path : mObjects)
+                isChecked.put(path, false);
+        }
+
 
         public void replaceList(List<MapPath> newList) {
             mObjects = newList;
@@ -288,6 +336,9 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             notifyDataSetChanged();
         }
 
+        public Map<MapPath, Boolean> getCheckedMap() {
+            return isChecked;
+        }
 
         public Context getContext() {
             return mContext;
@@ -358,6 +409,12 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             mSelectedPath = path;
         }
 
+        @Override
+        public void onCheckedChangeListener(MapPath path, boolean flag) {
+            Log.i(TAG, "Path " + path.getName() + " set as " + flag);
+            isChecked.put(path, flag);
+        }
+
         public MapPath getSelected() {
             return mSelectedPath;
         }
@@ -371,9 +428,16 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             TextView endTime;
             TextView distance;
             TextView velocity;
+            CheckBox isSelected;
             View mView;
             MapPath path;
             private ViewHolderContextMenuItemListener mListener;
+            private CheckBox.OnCheckedChangeListener mCheckboxListener = new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    mListener.onCheckedChangeListener(path, isChecked);
+                }
+            };
 
 
             public ViewHolder(View itemView, MenuInflater inflater,
@@ -387,12 +451,15 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
                 endTime = (TextView) itemView.findViewById(R.id.list_end_time);
                 distance = (TextView) itemView.findViewById(R.id.list_distance);
                 velocity = (TextView) itemView.findViewById(R.id.list_velocity);
+                isSelected = (CheckBox) itemView.findViewById(R.id.list_checkbox);
+                isSelected.setOnCheckedChangeListener(mCheckboxListener);
                 mMenuInflater = inflater;
             }
 
             public void setOnClickListener(View.OnClickListener listener) {
                 mView.setOnClickListener(listener);
             }
+
 
             @Override
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
