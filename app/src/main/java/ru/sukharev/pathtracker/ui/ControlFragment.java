@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.MapHelper;
+import ru.sukharev.pathtracker.utils.orm.MapPath;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -120,6 +121,10 @@ public class ControlFragment extends Fragment {
 
     public void clearData(){
         mHelper.clearData();
+    }
+
+    public void updatePath(MapPath path, String newName) {
+        mHelper.updatePath(path, newName);
     }
 
     public interface ControlFragmentListener {

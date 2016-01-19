@@ -29,6 +29,10 @@ import ru.sukharev.pathtracker.utils.orm.MapPoint;
 public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         com.google.android.gms.location.LocationListener {
 
+    private final static int SQL_SUCCESS = 0;
+    private final static int SQL_FAIL = 1;
+    private final static int SQL_ERROR = 2;
+
     private static final String TAG = "MapHelper.java";
     private final List<MapPoint> mPoints;
     private Context mContext;
@@ -192,6 +196,17 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         processPoint(newMapPoint);
     }
 
+    public void updatePath(final MapPath path, final String newName) {
+        try {
+            DatabaseHelper.PathDAO dao = mDatabaseHelper.getPathDAO();
+            dao.updateId(path, newName);
+            mSQLListener.onSuccess();
+        } catch (SQLException e) {
+            mSQLListener.onError(e);
+        }
+
+    }
+
 
     public interface MapHelperListener {
 
@@ -219,11 +234,10 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     }
 
+
     private class AsynkSaveToDatabaseTask extends AsyncTask<MapPath, Void, Integer> {
 
-        private final static int SUCCESS = 0;
-        private final static int FAIL = 1;
-        private final static int ERROR = 2;
+
         private Exception mException;
 
         @Override
@@ -236,24 +250,24 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
                     saveAllPoints();
                 } catch (SQLException e) {
                     mException = e;
-                    return ERROR;
+                    return SQL_ERROR;
                 }
-                return SUCCESS;
+                return SQL_SUCCESS;
             }
-            return FAIL;
+            return SQL_FAIL;
         }
 
         @Override
         protected void onPostExecute(Integer result) {
             super.onPostExecute(result);
             switch (result) {
-                case SUCCESS:
+                case SQL_SUCCESS:
                     mSQLListener.onSuccess();
                     break;
-                case FAIL:
+                case SQL_FAIL:
                     mSQLListener.onFail();
                     break;
-                case ERROR:
+                case SQL_ERROR:
                     if (mException != null) mSQLListener.onError(mException);
                     break;
                 default:

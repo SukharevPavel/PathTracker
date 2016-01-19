@@ -13,7 +13,6 @@ import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -33,6 +32,7 @@ import java.util.List;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
+import ru.sukharev.pathtracker.ui.dialog.PathRenamingFragment;
 import ru.sukharev.pathtracker.utils.Measurement;
 import ru.sukharev.pathtracker.utils.orm.MapPath;
 import ru.sukharev.pathtracker.utils.orm.OrmLoader;
@@ -53,17 +53,20 @@ interface ViewHolderContextMenuItemListener {
  * NavigationDrawer that shows the list of saved path and allows to interact with them
  */
 public class NavigationDrawerListFragment extends Fragment implements LoaderManager.LoaderCallbacks,
-        OnRecyclerViewClickListener {
+        OnRecyclerViewClickListener, PathRenamingFragment.DialogPathRenamingListener {
 
     private final static int PATH_LOADER_ID = 1;
     private final static String TAG = "NavigationDrawer.java";
+    private final static String PATH_RENAMING_FRAGMENT_TAG = "path_renaming_tag";
     private RecyclerView mRecyclerView;
     private PathAdapter mAdapter;
     private View mDrawerView;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-    private PathItemClickListener mPathListener;
+    private NavigationDrawerListener mPathListener;
     private MapPath mSelectedItem = null;
+    private Toolbar mDrawerToolbar;
+    private PathRenamingFragment mPathRenamingFragment;
 
 
 
@@ -72,14 +75,13 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     }
 
     public void reloadList() {
-        Log.i(TAG, "reload");
         final Loader loader = getLoaderManager().getLoader(PATH_LOADER_ID);
         if (loader != null && loader.isReset()) {
-            Log.i(TAG, "restart");
             getLoaderManager().restartLoader(PATH_LOADER_ID, null, this);
         }
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
     }
+
 
 
 
@@ -96,8 +98,16 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         mAdapter = new PathAdapter(getContext(),
                 new ArrayList<MapPath>(), this);
         mRecyclerView.setAdapter(mAdapter);
+
+        mDrawerToolbar = (Toolbar) v.findViewById(R.id.drawer_toolbar);
         //setListAdapter(mAdapter);
         return v;
+    }
+
+    private void setUpDrawerToolbar() {
+
+        mDrawerToolbar.setTitle(getString(R.string.navigation_drawer_toolbar));
+
     }
 
     @Override
@@ -106,7 +116,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         setRetainInstance(true);
         //  registerForContextMenu(getListView());
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
-        mPathListener = (PathItemClickListener) getActivity();
+        mPathListener = (NavigationDrawerListener) getActivity();
         // getListView().setOnItemClickListener(mItemListener);
         selectItem(mSelectedItem);
     }
@@ -123,7 +133,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        Log.i(TAG, "context menu item selected pos = " + mAdapter.getSelected());
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.delete_item:
@@ -136,9 +145,20 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
                     return super.onContextItemSelected(item);
                 }
                 return true;
+            case R.id.rename_item:
+                showPathRenamingFragment(mAdapter.getSelected().getName());
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    private void showPathRenamingFragment(String oldName) {
+        mPathRenamingFragment = new PathRenamingFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString(PathRenamingFragment.ARG_NAME, oldName);
+        mPathRenamingFragment.setArguments(bundle);
+        mPathRenamingFragment.setTargetFragment(this, 0);
+        mPathRenamingFragment.show(getActivity().getSupportFragmentManager(), PATH_RENAMING_FRAGMENT_TAG);
     }
 
     private void deletePathFromDatabase(MapPath path) throws SQLException {
@@ -158,12 +178,11 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
     @Override
     public void onLoadFinished(Loader loader, Object data) {
-        Log.i(TAG, "on load finished");
         if (mAdapter != null) {
-            Log.i(TAG, "replace list");
             mAdapter.replaceList((List<MapPath>) data);
         }
     }
+
 
     @Override
     public void onLoaderReset(Loader loader) {
@@ -225,10 +244,17 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             mDrawerLayout.closeDrawer(mDrawerView);
     }
 
+    @Override
+    public void onNewName(String name) {
+        mPathListener.onRenamingPath(mAdapter.getSelected(), name);
+    }
 
-    public interface PathItemClickListener {
+
+    public interface NavigationDrawerListener {
 
         void onPathClick(MapPath path);
+
+        void onRenamingPath(MapPath path, String newName);
 
     }
 
@@ -277,13 +303,11 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
                     ctx.getResources().getBoolean(R.bool.prefs_key_list_distance_def));
             doShowVelocity = prefs.getBoolean(ctx.getString(R.string.pref_key_list_velocity),
                     ctx.getResources().getBoolean(R.bool.prefs_key_list_velocity_def));
-            Log.i(TAG, doShowStartTime + "  + " + doShowEndTime + " " + doShowDistance + " " + doShowVelocity);
 
         }
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            Log.i(TAG, "create holder");
             View view = LayoutInflater.from(mContext).
                     inflate(R.layout.navigation_drawer_list_item, parent, false);
             return new ViewHolder(view, mMenuInflater, this);
@@ -291,7 +315,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         @Override
         public void onBindViewHolder(ViewHolder holder, final int position) {
-            Log.i(TAG, "bind holder pos=" + position);
             final MapPath path = getItem(position);
             holder.path = path;
             holder.name.setText(holder.path.getName());

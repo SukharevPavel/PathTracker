@@ -16,6 +16,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -53,7 +54,7 @@ import ru.sukharev.pathtracker.utils.orm.MapPoint;
 
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener,
         MapHelper.SQLInteractionListener, PathNamingFragment.DialogPathNamingListener,
-        NavigationDrawerListFragment.PathItemClickListener, ControlFragment.ControlFragmentListener,
+        NavigationDrawerListFragment.NavigationDrawerListener, ControlFragment.ControlFragmentListener,
         ClearDialogFragment.DialogClearListener, GoogleMap.OnMyLocationChangeListener {
 
     private final static String TAG = "MapActivity.java";
@@ -461,6 +462,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
+    public void onRenamingPath(MapPath path, String newName) {
+        mControlFragment.updatePath(path, newName);
+    }
+
+    @Override
     public void onCurrentButtonClick() {
         disableWatchingSavedPathMode();
 
@@ -491,12 +497,14 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onError(Exception e) {
+        Log.i(TAG, "error!");
         Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_SHORT).show();
         e.printStackTrace();
     }
 
     @Override
     public void onSuccess() {
+        Log.i(TAG, "success!");
         mNavigationDrawerFragment.reloadList();
     }
 
