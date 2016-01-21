@@ -1,21 +1,25 @@
 package ru.sukharev.pathtracker.ui;
 
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +38,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.provider.DatabaseHelper;
@@ -116,6 +121,30 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         mDrawerToolbar.setTitle(getString(R.string.navigation_drawer_toolbar));
         mDrawerToolbar.inflateMenu(R.menu.menu_navigation_drawer);
+        Menu menu = mDrawerToolbar.getMenu();
+
+        //TODO support 9-11 versions
+        SearchManager searchManager =
+                (SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.menu_search));
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getActivity().getComponentName()));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                NavigationDrawerListFragment.this.mAdapter.applyRegexToList(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                NavigationDrawerListFragment.this.mAdapter.applyRegexToList(newText);
+                return true;
+            }
+        });
+
+
         mDrawerToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -132,6 +161,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         });
 
     }
+
 
     private void deleteSelected() {
         Log.i(TAG, "delete selected");
@@ -312,6 +342,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         private OnRecyclerViewClickListener mListener;
         private MapPath mSelectedPath;
         private Map<MapPath, Boolean> isChecked;
+        private List<MapPath> mSavedObjects;
 
         public PathAdapter(Context ctx, List<MapPath> list, OnRecyclerViewClickListener listener) {
             mObjects = list;
@@ -319,6 +350,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             mListener = listener;
             getListSettings(getContext());
             mMenuInflater = new MenuInflater(getContext());
+            mSavedObjects = new ArrayList<>(mObjects);
             initCheckedMap();
         }
 
@@ -331,10 +363,29 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         public void replaceList(List<MapPath> newList) {
             mObjects = newList;
+            mSavedObjects = new ArrayList<>(mObjects);
             mUnits = new Measurement(getContext());
             getListSettings(getContext());
             notifyDataSetChanged();
         }
+
+        public void applyRegexToList(String regex) {
+            mObjects = new ArrayList<>(mSavedObjects);
+            if (!regex.isEmpty()) {
+                Pattern p = Pattern.compile(regex + ".*");
+                Log.i(TAG, p.toString());
+                List<MapPath> deletePath = new ArrayList<>(mObjects);
+                for (MapPath path : deletePath)
+                    if (!p.matcher(path.getName()).matches()) {
+                        Log.i(TAG, "remove name = " + path.getName());
+                        mObjects.remove(path);
+                    }
+
+            }
+            notifyDataSetChanged();
+
+        }
+
 
         public Map<MapPath, Boolean> getCheckedMap() {
             return isChecked;
@@ -398,6 +449,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             mObjects.remove(path);
             notifyItemRemoved(pos);
         }
+
 
         @Override
         public int getItemCount() {

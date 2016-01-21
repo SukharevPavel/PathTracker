@@ -83,6 +83,7 @@
     <string name="unit_minute_suffix">m</string>
     <string name="unit_second_suffix">s</string>
     <string name="menu_delete_selected">Delete selected</string>
+    <string name="search_hint">Type path name</string>
 
 
     <string-array name="array_distance_units">
@@ -124,5 +125,6 @@
         <item>180</item>
         <item>300</item>
     </string-array>
+    <string name="title_activity_search_path">SearchPathActivity</string>
 
 </resources>
