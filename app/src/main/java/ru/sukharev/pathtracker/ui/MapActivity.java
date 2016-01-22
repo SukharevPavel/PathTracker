@@ -102,6 +102,16 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        if (mMap != null) setMapType();
+        updateInfoFragmentIfExists();
+        mNavigationDrawerFragment.reloadList();
+
+
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_map_toolbar, menu);
@@ -118,11 +128,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onResume() {
-        setUpMapIfNeeded();
-        super.onResume();
-    }
 
     private void checkGPS() {
         LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);

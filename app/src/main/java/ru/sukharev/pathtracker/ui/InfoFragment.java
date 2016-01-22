@@ -43,10 +43,10 @@ public class InfoFragment extends Fragment {
         // Required empty public constructor
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUnits = new Measurement(getContext());
         initFields();
         setRetainInstance(true);
     }
@@ -90,6 +90,7 @@ public class InfoFragment extends Fragment {
 
     private void setTextFields(){
         //mTimeText.setText(String.valueOf(format.format(new Date(curTime - startTime))));
+        mUnits = new Measurement(getContext());
         mTimeText.setNewTime(totalTime);
         mDistText.setText(mUnits.formatMeters(dist));
         mSpeedText.setText(mUnits.formatSpeed(curSpeed));

@@ -204,7 +204,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setRetainInstance(true);
-        reloadList();
+        //reloadList();
         mPathListener = (NavigationDrawerListener) getActivity();
         selectItem(mSelectedItem);
     }
@@ -458,9 +458,13 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         private void setHolderVisibility(ViewHolder holder) {
             if (!doShowStartTime) holder.startTime.setVisibility(View.GONE);
+            else holder.startTime.setVisibility(View.VISIBLE);
             if (!doShowEndTime) holder.endTime.setVisibility(View.GONE);
+            else holder.endTime.setVisibility(View.VISIBLE);
             if (!doShowDistance) holder.distance.setVisibility(View.GONE);
+            else holder.distance.setVisibility(View.VISIBLE);
             if (!doShowVelocity) holder.velocity.setVisibility(View.GONE);
+            else holder.velocity.setVisibility(View.VISIBLE);
         }
 
         public MapPath getItem(int position) {
