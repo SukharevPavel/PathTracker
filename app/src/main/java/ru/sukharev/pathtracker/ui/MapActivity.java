@@ -336,6 +336,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         while (iterator.hasNext()) {
             points.add(iterator.next());
         }
+        Log.i(TAG, "points size = " + points.size());
         if (!points.isEmpty()) {
             initPathInfo(points);
             addListOfPoints(points);
@@ -447,6 +448,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onPathClick(MapPath path) {
+        if (path != null) Log.i(TAG, path.getName());
+        else Log.i(TAG, "path is null");
         ForeignCollection<MapPoint> points = path.getPoints();
         CloseableIterator<MapPoint> iterator = points.closeableIterator();
         try {
@@ -496,10 +499,9 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
-    public void onError(Exception e) {
+    public void onError() {
         Log.i(TAG, "error!");
         Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_SHORT).show();
-        e.printStackTrace();
     }
 
     @Override

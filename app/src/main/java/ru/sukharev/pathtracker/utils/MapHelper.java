@@ -198,14 +198,17 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     public void updatePath(final MapPath path, final String newName) {
         try {
-            DatabaseHelper.PathDAO dao = mDatabaseHelper.getPathDAO();
-            dao.updateId(path, newName);
-            mSQLListener.onSuccess();
+            if (path != null) {
+                DatabaseHelper.PathDAO dao = mDatabaseHelper.getPathDAO();
+                path.setName(newName);
+                dao.update(path);
+                mSQLListener.onSuccess();
+            } else mSQLListener.onFail();
         } catch (SQLException e) {
-            mSQLListener.onError(e);
+            mSQLListener.onError();
         }
-
     }
+
 
 
     public interface MapHelperListener {
@@ -226,7 +229,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     public interface SQLInteractionListener {
 
-        void onError(Exception e);
+        void onError();
 
         void onSuccess();
 
@@ -238,8 +241,6 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     private class AsynkSaveToDatabaseTask extends AsyncTask<MapPath, Void, Integer> {
 
 
-        private Exception mException;
-
         @Override
         protected Integer doInBackground(MapPath... params) {
             if (!mPoints.isEmpty()) {
@@ -249,7 +250,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
                     mDatabaseHelper.getPathDAO().create(mapPath);
                     saveAllPoints();
                 } catch (SQLException e) {
-                    mException = e;
+                    e.printStackTrace();
                     return SQL_ERROR;
                 }
                 return SQL_SUCCESS;
@@ -268,7 +269,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
                     mSQLListener.onFail();
                     break;
                 case SQL_ERROR:
-                    if (mException != null) mSQLListener.onError(mException);
+                    mSQLListener.onError();
                     break;
                 default:
                     break;

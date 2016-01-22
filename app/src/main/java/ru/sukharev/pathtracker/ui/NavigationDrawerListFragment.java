@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -79,6 +80,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     private MapPath mSelectedItem = null;
     private Toolbar mDrawerToolbar;
     private PathRenamingFragment mPathRenamingFragment;
+    private SearchView mSearchView;
 
 
 
@@ -123,27 +125,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         mDrawerToolbar.inflateMenu(R.menu.menu_navigation_drawer);
         Menu menu = mDrawerToolbar.getMenu();
 
-        //TODO support 9-11 versions
-        SearchManager searchManager =
-                (SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.menu_search));
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getActivity().getComponentName()));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                NavigationDrawerListFragment.this.mAdapter.applyRegexToList(query);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                NavigationDrawerListFragment.this.mAdapter.applyRegexToList(newText);
-                return true;
-            }
-        });
-
+        setUpSearchView(menu);
 
         mDrawerToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -160,6 +142,44 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             }
         });
 
+    }
+
+
+    private void setUpSearchView(Menu menu) {
+        SearchManager searchManager =
+                (SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE);
+        mSearchView =
+                (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.menu_search));
+        mSearchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getActivity().getComponentName()));
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                applyRegex(query);
+                hideKeyboard();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                applyRegex(newText);
+                return true;
+            }
+        });
+
+    }
+
+    private void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().
+                    getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    private void applyRegex(String text) {
+        mAdapter.applyRegexToList(text);
     }
 
 
@@ -183,10 +203,8 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setRetainInstance(true);
-        //  registerForContextMenu(getListView());
         reloadList();
         mPathListener = (NavigationDrawerListener) getActivity();
-        // getListView().setOnItemClickListener(mItemListener);
         selectItem(mSelectedItem);
     }
 
@@ -250,6 +268,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         if (mAdapter != null) {
             mAdapter.replaceList((List<MapPath>) data);
         }
+        applyRegex(String.valueOf(mSearchView.getQuery()));
     }
 
 
@@ -341,7 +360,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         private MenuInflater mMenuInflater;
         private OnRecyclerViewClickListener mListener;
         private MapPath mSelectedPath;
-        private Map<MapPath, Boolean> isChecked;
+        private Map<MapPath, Boolean> mapOfCheckedPaths;
         private List<MapPath> mSavedObjects;
 
         public PathAdapter(Context ctx, List<MapPath> list, OnRecyclerViewClickListener listener) {
@@ -351,14 +370,10 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             getListSettings(getContext());
             mMenuInflater = new MenuInflater(getContext());
             mSavedObjects = new ArrayList<>(mObjects);
-            initCheckedMap();
+            mapOfCheckedPaths = new HashMap<>(mObjects.size());
         }
 
-        public void initCheckedMap() {
-            isChecked = new HashMap<>(mObjects.size());
-            for (MapPath path : mObjects)
-                isChecked.put(path, false);
-        }
+
 
 
         public void replaceList(List<MapPath> newList) {
@@ -388,7 +403,13 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
 
         public Map<MapPath, Boolean> getCheckedMap() {
-            return isChecked;
+            return mapOfCheckedPaths;
+        }
+
+        public boolean isPathChecked(MapPath path) {
+            if (mapOfCheckedPaths.containsKey(path))
+                return mapOfCheckedPaths.get(path);
+            else return false;
         }
 
         public Context getContext() {
@@ -424,6 +445,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             holder.endTime.setText(format.format(new Date(holder.path.getEndTime())));
             holder.distance.setText(mUnits.formatMeters(holder.path.getDistance()));
             holder.velocity.setText(mUnits.formatSpeed(holder.path.getAvgSpeed()));
+            holder.checkbox.setChecked(isPathChecked(path));
             holder.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -447,6 +469,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         public void remove(MapPath path) {
             int pos = mObjects.indexOf(path);
             mObjects.remove(path);
+            mSavedObjects.remove(path);
             notifyItemRemoved(pos);
         }
 
@@ -464,7 +487,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         @Override
         public void onCheckedChangeListener(MapPath path, boolean flag) {
             Log.i(TAG, "Path " + path.getName() + " set as " + flag);
-            isChecked.put(path, flag);
+            mapOfCheckedPaths.put(path, flag);
         }
 
         public MapPath getSelected() {
@@ -480,7 +503,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             TextView endTime;
             TextView distance;
             TextView velocity;
-            CheckBox isSelected;
+            CheckBox checkbox;
             View mView;
             MapPath path;
             private ViewHolderContextMenuItemListener mListener;
@@ -503,8 +526,8 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
                 endTime = (TextView) itemView.findViewById(R.id.list_end_time);
                 distance = (TextView) itemView.findViewById(R.id.list_distance);
                 velocity = (TextView) itemView.findViewById(R.id.list_velocity);
-                isSelected = (CheckBox) itemView.findViewById(R.id.list_checkbox);
-                isSelected.setOnCheckedChangeListener(mCheckboxListener);
+                checkbox = (CheckBox) itemView.findViewById(R.id.list_checkbox);
+                checkbox.setOnCheckedChangeListener(mCheckboxListener);
                 mMenuInflater = inflater;
             }
 

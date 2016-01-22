@@ -4,6 +4,7 @@
 
     <string name="error_saving_to_db">Error saving to database, try again. Maybe, path with this name already exists?</string>
     <string name="error_saving_list_is_empty">List of points is empty</string>
+    <string name="error_saving_fail">Failed save to database</string>
     <string name="error_no_path_info">Error saving to database - no info about current path</string>
     <!--fragment_dialogs-->
     <string name="type_path_name">Type name of path</string>

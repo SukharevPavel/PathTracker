@@ -19,7 +19,9 @@ public class MapPath {
     public final static String COLUMN_END_DATE = "end";
     public final static String COLUMN_DISTANCE = "distance";
     public final static String COLUMN_AVG_SPEED = "avg_speed";
-    @DatabaseField(id = true, canBeNull = false, dataType = DataType.STRING, columnName = COLUMN_NAME)
+    @DatabaseField(generatedId = true)
+    private int id;
+    @DatabaseField(canBeNull = false, dataType = DataType.STRING, columnName = COLUMN_NAME)
     private String name;
     @DatabaseField(canBeNull = false, dataType = DataType.LONG, columnName = COLUMN_START_DATE)
     private long startTime;
@@ -49,6 +51,10 @@ public class MapPath {
 
     public ForeignCollection<MapPoint> getPoints() {
         return points;
+    }
+
+    public void setPoints(ForeignCollection<MapPoint> points) {
+        this.points = points;
     }
 
     public String getName() {
@@ -91,4 +97,11 @@ public class MapPath {
         this.avgSpeed = avgSpeed;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }
