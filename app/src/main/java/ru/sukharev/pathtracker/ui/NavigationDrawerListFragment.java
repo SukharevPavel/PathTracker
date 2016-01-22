@@ -189,9 +189,10 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         try {
             for (MapPath path : map.keySet()) {
                 Log.i(TAG, "Path " + path.getName() + " has flag " + map.get(path));
-                if (map.get(path))
+                if (map.get(path)) {
                     deletePathFromDatabase(path);
-                mAdapter.remove(path);
+                    mAdapter.remove(path);
+                }
             }
         } catch (SQLException e) {
             Toast.makeText(getContext(), getString(R.string.error_delete_path), Toast.LENGTH_LONG).show();
@@ -468,9 +469,11 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         public void remove(MapPath path) {
             int pos = mObjects.indexOf(path);
-            mObjects.remove(path);
+            if (mObjects.contains(path)) {
+                mObjects.remove(path);
+                notifyItemRemoved(pos);
+            }
             mSavedObjects.remove(path);
-            notifyItemRemoved(pos);
         }
 
 
