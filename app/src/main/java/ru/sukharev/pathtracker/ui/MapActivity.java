@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -55,7 +57,8 @@ import ru.sukharev.pathtracker.utils.orm.MapPoint;
 public class MapActivity extends AppCompatActivity implements MapHelper.MapHelperListener,
         MapHelper.SQLInteractionListener, PathNamingFragment.DialogPathNamingListener,
         NavigationDrawerListFragment.NavigationDrawerListener, ControlFragment.ControlFragmentListener,
-        ClearDialogFragment.DialogClearListener, GoogleMap.OnMyLocationChangeListener {
+        ClearDialogFragment.DialogClearListener, GoogleMap.OnMyLocationChangeListener,
+        InfoFragment.InfoFragmentListener {
 
     private final static String TAG = "MapActivity.java";
 
@@ -83,32 +86,53 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        Log.i(TAG, "activity create start");
 
-        setUpMapIfNeeded();
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
         setUpFragments();
 
+        //Map needs info about control fragment to pad from bottom
+        setUpMapIfNeeded();
+
+
         checkPermission();
+
 
         //check GPS and center user location only if first time launch
         if (savedInstanceState == null) {
             mMap.setOnMyLocationChangeListener(this);
             checkGPS();
         }
+        Log.i(TAG, "activity create end");
 
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        padMapElements(mMap);
+        Log.i(TAG, "activity start");
         if (mMap != null) setMapType();
         updateInfoFragmentIfExists();
         mNavigationDrawerFragment.reloadList();
+        mMap.setMyLocationEnabled(true);
 
 
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mMap.setMyLocationEnabled(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -149,6 +173,24 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
                 findFragmentById(R.id.control_fragment);
 
         mInfoFragment = (InfoFragment) getSupportFragmentManager().findFragmentByTag(INFO_FRAGMENT_TAG);
+    }
+
+    private void padMapElements(final GoogleMap map) {
+        ViewTreeObserver observer = mControlFragment.getView().getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                map.setPadding(0, 0, 0, mControlFragment.getView().getHeight());
+                ViewTreeObserver observer = mControlFragment.getView().getViewTreeObserver();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    observer.removeOnGlobalLayoutListener(this);
+                } else {
+                    observer.removeGlobalOnLayoutListener(this);
+                }
+            }
+
+        });
     }
 
     private void checkPermission() {
@@ -341,7 +383,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         while (iterator.hasNext()) {
             points.add(iterator.next());
         }
-        Log.i(TAG, "points size = " + points.size());
         if (!points.isEmpty()) {
             initPathInfo(points);
             addListOfPoints(points);
@@ -354,7 +395,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onStartPoint(MapPoint startPoint) {
         if (!isShowingSaved) {
             setUpMapIfNeeded();
-            //clearMap();
             if (mPathInfo == null) initPathInfo(Collections.singletonList(startPoint));
             else mPathInfo.addPointInfo(startPoint);
             setStartPoint(startPoint);
@@ -410,8 +450,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             bundle.putDouble(InfoFragment.ARG_DISTANCE, mPathInfo.getDistance());
             mInfoFragment.setArguments(bundle);
         }
-        getSupportFragmentManager()
-                .beginTransaction()
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction()
                 .setCustomAnimations(R.anim.anim_info_in,
                         R.anim.anim_info_out)
                 .add(R.id.info_fragment, mInfoFragment, INFO_FRAGMENT_TAG)
@@ -419,13 +459,15 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     public void removeInfoFragment() {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(R.anim.anim_info_in,
-                        R.anim.anim_info_out)
+        FragmentManager manager = getSupportFragmentManager();
+
+        manager.beginTransaction()
                 .remove(mInfoFragment)
                 .commit();
+
         mInfoFragment = null;
+
+
     }
 
     @Override
@@ -453,8 +495,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onPathClick(MapPath path) {
-        if (path != null) Log.i(TAG, path.getName());
-        else Log.i(TAG, "path is null");
         ForeignCollection<MapPoint> points = path.getPoints();
         CloseableIterator<MapPoint> iterator = points.closeableIterator();
         try {
@@ -527,4 +567,10 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         moveCameraToPosition(new LatLng(location.getLatitude(), location.getLongitude()));
         mMap.setOnMyLocationChangeListener(null);
     }
+
+    @Override
+    public void onInfoFragmentClick() {
+        removeInfoFragment();
+    }
+
 }

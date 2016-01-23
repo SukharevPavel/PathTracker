@@ -15,7 +15,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context="ru.sukharev.pathtracker.ui.InfoFragment">
-        <!-- TODO new clock for api 21+ -->
     <DigitalClock
         android:id="@+id/info_clock"
         android:layout_width="wrap_content"

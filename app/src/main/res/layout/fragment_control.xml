@@ -1,10 +1,19 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/app_color"
+    card_view:cardBackgroundColor="@color/app_color_lt"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardElevation="5dp">
+
+    <LinearLayout
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@android:color/transparent"
     android:orientation="horizontal"
     tools:context="ru.sukharev.pathtracker.ui.ControlFragment">
+
 
     <ImageButton
         android:id="@+id/button_control_service"
@@ -57,5 +66,5 @@
         android:contentDescription="@string/desc_clear_path"
         android:src="@drawable/delete" />
 
-
-</LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

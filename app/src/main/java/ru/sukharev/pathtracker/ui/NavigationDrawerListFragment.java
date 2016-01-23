@@ -16,7 +16,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -96,7 +95,12 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         getLoaderManager().getLoader(PATH_LOADER_ID).forceLoad();
     }
 
-
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mAdapter = new PathAdapter(getContext(),
+                new ArrayList<MapPath>(), this);
+    }
 
 
     @Override
@@ -109,8 +113,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mAdapter = new PathAdapter(getContext(),
-                new ArrayList<MapPath>(), this);
+
         mRecyclerView.setAdapter(mAdapter);
 
         mDrawerToolbar = (Toolbar) v.findViewById(R.id.drawer_toolbar);
@@ -184,11 +187,9 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
 
     private void deleteSelected() {
-        Log.i(TAG, "delete selected");
         Map<MapPath, Boolean> map = mAdapter.getCheckedMap();
         try {
             for (MapPath path : map.keySet()) {
-                Log.i(TAG, "Path " + path.getName() + " has flag " + map.get(path));
                 if (map.get(path)) {
                     deletePathFromDatabase(path);
                     mAdapter.remove(path);
@@ -207,6 +208,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         //reloadList();
         mPathListener = (NavigationDrawerListener) getActivity();
         selectItem(mSelectedItem);
+
     }
 
     private void selectItem(MapPath path) {
@@ -389,11 +391,9 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             mObjects = new ArrayList<>(mSavedObjects);
             if (!regex.isEmpty()) {
                 Pattern p = Pattern.compile(regex + ".*");
-                Log.i(TAG, p.toString());
                 List<MapPath> deletePath = new ArrayList<>(mObjects);
                 for (MapPath path : deletePath)
                     if (!p.matcher(path.getName()).matches()) {
-                        Log.i(TAG, "remove name = " + path.getName());
                         mObjects.remove(path);
                     }
 
@@ -493,7 +493,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         @Override
         public void onCheckedChangeListener(MapPath path, boolean flag) {
-            Log.i(TAG, "Path " + path.getName() + " set as " + flag);
             mapOfCheckedPaths.put(path, flag);
         }
 

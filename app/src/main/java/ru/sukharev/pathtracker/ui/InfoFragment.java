@@ -38,6 +38,7 @@ public class InfoFragment extends Fragment {
     private double dist;
     private double curSpeed;
     private double avgSpeed;
+    private InfoFragmentListener mListener;
 
     public InfoFragment() {
         // Required empty public constructor
@@ -56,15 +57,12 @@ public class InfoFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_info, container, false);
 
+        mListener = (InfoFragmentListener) getActivity();
+
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .setCustomAnimations(R.anim.anim_info_in,
-                                R.anim.anim_info_out)
-                        .remove(InfoFragment.this)
-                        .commit();
+                mListener.onInfoFragmentClick();
             }
         });
         mTimeText = (TimerView) v.findViewById(R.id.info_timer);
@@ -111,6 +109,14 @@ public class InfoFragment extends Fragment {
     public void dropAllFields() {
         this.avgSpeed = this.curSpeed = this.dist = this.totalTime = NO_DATA;
         setTextFields();
+    }
+
+
+    public interface InfoFragmentListener {
+
+        void onInfoFragmentClick();
+
+
     }
 
 

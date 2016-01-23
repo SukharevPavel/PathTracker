@@ -9,7 +9,7 @@
         app:showAsAction="always|collapseActionView" />
     <item
         android:id="@+id/menu_delete_selected"
-        android:icon="@drawable/delete_white"
+        android:icon="@drawable/delete"
         android:title="@string/menu_delete_selected"
         app:showAsAction="ifRoom" />
 </menu>
