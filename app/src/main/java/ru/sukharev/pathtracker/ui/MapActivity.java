@@ -298,9 +298,10 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     private void addPolyline(Iterable<LatLng> list) {
         PolylineOptions options = new PolylineOptions().
-                geodesic(true).
-                color(ContextCompat.getColor(this, R.color.red_lt))
+                geodesic(true)
                 .addAll(list);
+        if (isShowingSaved) options.color(ContextCompat.getColor(this, R.color.blue_lt));
+        else options.color(ContextCompat.getColor(this, R.color.red_lt));
         Polyline polyline = mMap.addPolyline(options);
         mPolylines.add(polyline);
 
@@ -315,8 +316,9 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
         }
 
         PolylineOptions options = new PolylineOptions().
-                geodesic(true).
-                color(ContextCompat.getColor(this, R.color.red_lt));
+                geodesic(true);
+        if (isShowingSaved) options.color(ContextCompat.getColor(this, R.color.blue_lt));
+        else options.color(ContextCompat.getColor(this, R.color.red_lt));
         if (resultList != null) options.addAll(resultList);
         if (list != null) options.addAll(list);
         mPolylines.set(mPolylines.size() - 1, mMap.addPolyline(options));
@@ -495,6 +497,8 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
     @Override
     public void onPathClick(MapPath path) {
+        enableWatchingSavedPathMode();
+
         ForeignCollection<MapPoint> points = path.getPoints();
         CloseableIterator<MapPoint> iterator = points.closeableIterator();
         try {
@@ -506,7 +510,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
                 e.printStackTrace();
             }
         }
-        enableWatchingSavedPathMode();
+
     }
 
     @Override
