@@ -110,5 +110,12 @@ public class MapPath {
         return id;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (!(o instanceof MapPath)) return false;
+        return (id == ((MapPath) o).getId());
+    }
+
 }
 

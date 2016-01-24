@@ -12,6 +12,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+        android:padding="@dimen/half_margin"
     tools:context="ru.sukharev.pathtracker.ui.ControlFragment">
 
 
@@ -28,20 +29,20 @@
         android:id="@+id/button_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/desc_save_button"
+        android:paddingLeft="@dimen/half_margin"
+        android:paddingStart="@dimen/half_margin"
         android:src="@drawable/content_save" />
 
     <ImageButton
         android:id="@+id/button_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/desc_path_info"
+        android:paddingLeft="@dimen/half_margin"
+        android:paddingStart="@dimen/half_margin"
         android:src="@drawable/information"
          />
 
@@ -49,10 +50,10 @@
         android:id="@+id/button_show_current"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/desc_show_current"
+        android:paddingLeft="@dimen/half_margin"
+        android:paddingStart="@dimen/half_margin"
         android:src="@drawable/eye"
         android:visibility="invisible" />
 
@@ -60,10 +61,10 @@
         android:id="@+id/button_clear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/desc_clear_path"
+        android:paddingLeft="@dimen/half_margin"
+        android:paddingStart="@dimen/half_margin"
         android:src="@drawable/delete" />
 
     </LinearLayout>

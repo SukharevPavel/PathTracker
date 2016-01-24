@@ -4,9 +4,12 @@ package ru.sukharev.pathtracker.ui;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -112,7 +115,9 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
+        mRecyclerView.addItemDecoration(new PathAdapter.SimpleDividerItemDecoration(
+                getActivity()
+        ));
 
         mRecyclerView.setAdapter(mAdapter);
 
@@ -212,8 +217,10 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     }
 
     private void selectItem(MapPath path) {
-        if (path != null)
+        if (path != null) {
             mPathListener.onPathClick(path);
+            mAdapter.setSelected(path);
+        }
     }
 
     public void invalidateSelection() {
@@ -282,7 +289,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
     public void setUp(DrawerLayout drawerLayout, Toolbar toolbar, int fragmentId) {
         mDrawerLayout = drawerLayout;
-        mDrawerView = getActivity().findViewById(R.id.navigation_drawer_list_fragment);
+        mDrawerView = getActivity().findViewById(R.id.navigation_view);
         mDrawerToggle = new ActionBarDrawerToggle(
                 getActivity(),                    /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */
@@ -365,6 +372,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         private MapPath mSelectedPath;
         private Map<MapPath, Boolean> mapOfCheckedPaths;
         private List<MapPath> mSavedObjects;
+        private MapPath selectedPath;
 
         public PathAdapter(Context ctx, List<MapPath> list, OnRecyclerViewClickListener listener) {
             mObjects = list;
@@ -375,9 +383,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             mSavedObjects = new ArrayList<>(mObjects);
             mapOfCheckedPaths = new HashMap<>(mObjects.size());
         }
-
-
-
 
         public void replaceList(List<MapPath> newList) {
             mObjects = newList;
@@ -401,7 +406,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             notifyDataSetChanged();
 
         }
-
 
         public Map<MapPath, Boolean> getCheckedMap() {
             return mapOfCheckedPaths;
@@ -434,11 +438,13 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(mContext).
                     inflate(R.layout.navigation_drawer_list_item, parent, false);
+            view.setFocusable(true);
             return new ViewHolder(view, mMenuInflater, this);
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, final int position) {
+
             final MapPath path = getItem(position);
             holder.path = path;
             holder.name.setText(holder.path.getName());
@@ -447,6 +453,8 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             holder.distance.setText(mUnits.formatMeters(holder.path.getDistance()));
             holder.velocity.setText(mUnits.formatSpeed(holder.path.getAvgSpeed()));
             holder.checkbox.setChecked(isPathChecked(path));
+            if (path.equals(selectedPath)) holder.setSelected(true);
+            else holder.setSelected(false);
             holder.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -480,7 +488,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             mSavedObjects.remove(path);
         }
 
-
         @Override
         public int getItemCount() {
             return mObjects.size();
@@ -498,6 +505,41 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         public MapPath getSelected() {
             return mSelectedPath;
+        }
+
+        public void setSelected(MapPath path) {
+            if (selectedPath != null && mObjects.contains(selectedPath))
+                notifyItemChanged(mObjects.indexOf(selectedPath));
+            selectedPath = path;
+            if (mObjects.contains(selectedPath))
+                notifyItemChanged(mObjects.indexOf(selectedPath));
+        }
+
+        public static class SimpleDividerItemDecoration extends RecyclerView.ItemDecoration {
+            private Drawable mDivider;
+
+            public SimpleDividerItemDecoration(Context context) {
+                mDivider = ContextCompat.getDrawable(context, R.drawable.recycler_view_divider);
+            }
+
+            @Override
+            public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+                int left = parent.getPaddingLeft();
+                int right = parent.getWidth() - parent.getPaddingRight();
+
+                int childCount = parent.getChildCount();
+                for (int i = 0; i < childCount; i++) {
+                    View child = parent.getChildAt(i);
+
+                    RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
+
+                    int top = child.getBottom() + params.bottomMargin;
+                    int bottom = top + mDivider.getIntrinsicHeight();
+
+                    mDivider.setBounds(left, top, right, bottom);
+                    mDivider.draw(c);
+                }
+            }
         }
 
         public static class ViewHolder extends RecyclerView.ViewHolder
@@ -546,6 +588,11 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
                 mMenuInflater.inflate(R.menu.context_list_menu, menu);
                 mListener.onContextMenuSelect(path);
+            }
+
+            public void setSelected(boolean isSelected) {
+                if (isSelected) mView.setBackgroundResource(R.drawable.recycler_item_focused);
+                else mView.setBackgroundResource(R.drawable.recycler_item_idle);
             }
         }
     }

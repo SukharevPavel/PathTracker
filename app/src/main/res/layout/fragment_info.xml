@@ -6,7 +6,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    card_view:cardBackgroundColor="@color/app_color_lt"
+    card_view:cardBackgroundColor="@android:color/white"
     card_view:cardCornerRadius="4dp"
     card_view:cardElevation="5dp">
     <LinearLayout
@@ -14,49 +14,68 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:padding="@dimen/half_margin"
         tools:context="ru.sukharev.pathtracker.ui.InfoFragment">
     <DigitalClock
         android:id="@+id/info_clock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@color/app_color_dark"
+        android:textSize="@dimen/size_primary_text"
          />
         <TextView
             android:id="@+id/info_timer_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/info_time" />
+            android:text="@string/info_time"
+            android:textColor="@color/app_color"
+            android:textSize="@dimen/size_secondary_text" />
 
         <ru.sukharev.pathtracker.utils.TimerView
             android:id="@+id/info_timer"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/size_primary_text" />
         <TextView
             android:id="@+id/info_dist_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/info_dist" />
+            android:text="@string/info_dist"
+            android:textColor="@color/app_color"
+            android:textSize="@dimen/size_secondary_text" />
         <TextView
             android:id="@+id/info_dist"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/size_primary_text" />
         <TextView
             android:id="@+id/info_cur_speed_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/info_cur_speed" />
+            android:text="@string/info_cur_speed"
+            android:textColor="@color/app_color"
+            android:textSize="@dimen/size_secondary_text" />
         <TextView
             android:id="@+id/info_cur_speed"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/size_primary_text" />
         <TextView
             android:id="@+id/info_avg_speed_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/info_avg_speed" />
+            android:text="@string/info_avg_speed"
+            android:textColor="@color/app_color"
+            android:textSize="@dimen/size_secondary_text" />
         <TextView
             android:id="@+id/info_avg_speed"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/size_primary_text" />
     </LinearLayout>
 </android.support.v7.widget.CardView
     >

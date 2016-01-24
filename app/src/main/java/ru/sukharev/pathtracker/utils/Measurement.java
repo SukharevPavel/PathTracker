@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import java.text.DecimalFormat;
+
 import ru.sukharev.pathtracker.R;
 
 /**
@@ -19,6 +21,7 @@ public class Measurement {
     private final static int HOUR_POSITION_IN_STRING_ARRAY_RESOURCE = 0;
     private final static int MINUTE_POSITION_IN_STRING_ARRAY_RESOURCE = 1;
     private final static int SECOND_POSITION_IN_STRING_ARRAY_RESOURCE = 2;
+    private final static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
     SharedPreferences mPreferences;
     Context mContext;
 
@@ -30,7 +33,7 @@ public class Measurement {
 
     public String formatMeters(double metre) {
         StringBuilder builder = new StringBuilder();
-        builder.append(convertMeters(metre));
+        builder.append(DECIMAL_FORMAT.format(convertMeters(metre)));
         builder.append(Commons.SPACE);
         appendDistanceSuffix(builder);
         builder.append(Commons.DOT);
@@ -156,7 +159,7 @@ public class Measurement {
         //Minutes
         //Seconds
         StringBuilder builder = new StringBuilder();
-        builder.append(convertPerSeconds(convertMeters(metrePerSec)));
+        builder.append(DECIMAL_FORMAT.format(convertPerSeconds(convertMeters(metrePerSec))));
         builder.append(Commons.SPACE);
         appendDistanceSuffix(builder);
         builder.append(Commons.SLASH);

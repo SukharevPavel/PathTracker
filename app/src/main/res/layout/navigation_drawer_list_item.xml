@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:background="@drawable/recycler_item_idle"
+    android:padding="@dimen/common_margin">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,34 +12,42 @@
         android:layout_toLeftOf="@+id/list_checkbox"
         android:layout_toStartOf="@id/list_checkbox"
         android:orientation="vertical">
-    <TextView
-        android:id="@+id/list_item_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/white" />
-    <TextView
-        android:id="@+id/list_start_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/darker_gray" />
-    <TextView
-        android:id="@+id/list_end_time"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/darker_gray" />
 
-    <TextView
-        android:id="@+id/list_distance"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/darker_gray" />
+        <TextView
+            android:id="@+id/list_item_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/size_primary_text" />
 
-    <TextView
-        android:id="@+id/list_velocity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/darker_gray" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/list_start_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/app_color"
+            android:textSize="@dimen/size_secondary_text" />
+
+        <TextView
+            android:id="@+id/list_end_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/app_color"
+            android:textSize="@dimen/size_secondary_text" />
+
+        <TextView
+            android:id="@+id/list_distance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/app_color"
+            android:textSize="@dimen/size_secondary_text" />
+
+        <TextView
+            android:id="@+id/list_velocity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/app_color"
+            android:textSize="@dimen/size_secondary_text" />
+    </LinearLayout>
 
     <CheckBox
         android:id="@id/list_checkbox"
@@ -46,3 +56,4 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true" />
 </RelativeLayout>
+

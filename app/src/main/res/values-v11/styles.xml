@@ -1,0 +1,50 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+
+        <item name="windowActionBar">false</item>
+
+        <item name="windowNoTitle">true</item>
+
+        <item name="android:textColorSecondary">@color/app_color</item>
+
+        <item name="colorAccent">@color/app_color_lt</item>
+
+        <item name="actionBarStyle">@style/app_action_bar</item>
+
+        <item name="colorPrimary">@color/app_color</item>
+
+        <item name="colorPrimaryDark">@color/app_color_dark</item>
+
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+
+        <item name="editTextBackground">@drawable/apptheme_edit_text_holo_light</item>
+
+        <item name="android:listChoiceIndicatorMultiple">@drawable/apptheme_btn_check_holo_light
+        </item>
+
+        <item name="listChoiceBackgroundIndicator">@drawable/apptheme_list_selector_holo_light
+        </item>
+
+        <item name="android:activatedBackgroundIndicator">
+            @drawable/apptheme_activated_background_holo_light
+        </item>
+
+    </style>
+
+    <style name="app_action_bar" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/app_color</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+        <item name="titleTextStyle">@style/app_action_bar_title_text</item>
+    </style>
+
+    <style name="app_action_bar_title_text" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+</resources>
