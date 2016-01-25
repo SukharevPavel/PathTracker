@@ -130,6 +130,10 @@ public class ControlFragment extends Fragment {
         mHelper.updatePath(path, newName);
     }
 
+    public void deletePath(MapPath path) {
+        mHelper.deletePath(path);
+    }
+
     public interface ControlFragmentListener {
 
         void onCurrentButtonClick();

@@ -17,7 +17,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -87,7 +86,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-        Log.i(TAG, "activity create start");
 
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -107,7 +105,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             mMap.setOnMyLocationChangeListener(this);
             checkGPS();
         }
-        Log.i(TAG, "activity create end");
 
     }
 
@@ -115,7 +112,6 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     public void onStart() {
         super.onStart();
         if (mMap != null) padMapElements(mMap);
-        Log.i(TAG, "activity start");
         if (mMap != null) setMapType();
         updateInfoFragmentIfExists();
         mNavigationDrawerFragment.reloadList();
@@ -532,6 +528,11 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
+    public void onPathDelete(MapPath path) {
+        mControlFragment.deletePath(path);
+    }
+
+    @Override
     public void onCurrentButtonClick() {
         disableWatchingSavedPathMode();
 
@@ -561,20 +562,50 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     }
 
     @Override
-    public void onError() {
-        Log.i(TAG, "error!");
-        Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_SHORT).show();
+    public void onError(int errorCode) {
+        switch (errorCode) {
+            case ERROR_CODES.ADD:
+                Toast.makeText(this, getString(R.string.error_saving_to_db), Toast.LENGTH_SHORT)
+                        .show();
+                break;
+            case ERROR_CODES.UPDATE:
+                Toast.makeText(this, getString(R.string.error_updating_db), Toast.LENGTH_SHORT)
+                        .show();
+                break;
+            case ERROR_CODES.DELETE:
+                Toast.makeText(this, getString(R.string.error_deleting_from_db), Toast.LENGTH_SHORT)
+                        .show();
+                break;
+            default:
+                break;
+
+        }
     }
 
     @Override
     public void onSuccess() {
-        Log.i(TAG, "success!");
         mNavigationDrawerFragment.reloadList();
     }
 
     @Override
-    public void onFail() {
-        Toast.makeText(this, getString(R.string.error_saving_list_is_empty), Toast.LENGTH_SHORT).show();
+    public void onFail(int failCode) {
+        switch (failCode) {
+            case FAIL_CODES.ADD:
+                Toast.makeText(this, getString(R.string.fail_saving_add), Toast.LENGTH_SHORT)
+                        .show();
+                break;
+            case FAIL_CODES.LIST_EMPTY:
+                Toast.makeText(this, getString(R.string.fail_list_is_empty), Toast.LENGTH_SHORT)
+                        .show();
+                break;
+            case FAIL_CODES.PATH_IS_NULL:
+                Toast.makeText(this, getString(R.string.fail_path_is_null), Toast.LENGTH_SHORT)
+                        .show();
+                break;
+            default:
+                break;
+
+        }
     }
 
 

@@ -260,7 +260,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     }
 
     private void deletePathFromDatabase(MapPath path) throws SQLException {
-        DatabaseHelper.getInstance(getContext()).getPathDAO().delete(path);
+        mPathListener.onPathDelete(path);
     }
 
 
@@ -354,6 +354,8 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         void onPathClick(MapPath path);
 
         void onRenamingPath(MapPath path, String newName);
+
+        void onPathDelete(MapPath path);
 
     }
 

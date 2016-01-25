@@ -11,6 +11,8 @@ import android.support.v7.preference.PreferenceManager;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.j256.ormlite.dao.CloseableIterator;
+import com.j256.ormlite.dao.ForeignCollection;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -81,7 +83,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
         try {
             mSQLListener = (SQLInteractionListener) activity;
         } catch (ClassCastException e) {
-            mSQLListener = null;
+            mSQLListener = SQLInteractionListener.dummySQLListener;
         }
     }
 
@@ -127,7 +129,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
             new AsynkSaveToDatabaseTask().execute(mapPath);
 
 
-        } else mSQLListener.onFail();
+        } else mSQLListener.onFail(SQLInteractionListener.FAIL_CODES.LIST_EMPTY);
     }
 
     public boolean isServiceStarted() {
@@ -203,12 +205,15 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
                 path.setName(newName);
                 dao.update(path);
                 mSQLListener.onSuccess();
-            } else mSQLListener.onFail();
+            } else mSQLListener.onFail(SQLInteractionListener.FAIL_CODES.PATH_IS_NULL);
         } catch (SQLException e) {
-            mSQLListener.onError();
+            mSQLListener.onError(SQLInteractionListener.ERROR_CODES.UPDATE);
         }
     }
 
+    public void deletePath(MapPath path) {
+        new AsynkDeleteFromDatabaseTask().execute(path);
+    }
 
 
     public interface MapHelperListener {
@@ -229,12 +234,71 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
 
     public interface SQLInteractionListener {
 
-        void onError();
+        SQLInteractionListener dummySQLListener = new SQLInteractionListener() {
+            @Override
+            public void onError(int code) {
+            }
+
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onFail(int code) {
+            }
+        };
+
+        void onError(int errorCode);
 
         void onSuccess();
 
-        void onFail();
+        void onFail(int failCode);
 
+        class ERROR_CODES {
+            public static final int ADD = 1;
+            public static final int UPDATE = 2;
+            public static final int DELETE = 3;
+        }
+
+        class FAIL_CODES {
+            public static final int ADD = 1;
+            public static final int LIST_EMPTY = 3;
+            public static final int PATH_IS_NULL = 4;
+        }
+
+    }
+
+
+    private class AsynkDeleteFromDatabaseTask extends AsyncTask<MapPath, Void, Void> {
+
+        @Override
+        protected Void doInBackground(MapPath... params) {
+            MapPath mapPath = params[0];
+            ForeignCollection<MapPoint> points = mapPath.getPoints();
+            CloseableIterator<MapPoint> iterator = points.closeableIterator();
+            try {
+                mDatabaseHelper.getPathDAO().delete(mapPath);
+                publishProgress();
+                while (iterator.hasNext()) {
+                    MapPoint point = iterator.next();
+                    mDatabaseHelper.getPointDAO().delete(point);
+                }
+            } catch (SQLException e) {
+                mSQLListener.onError(SQLInteractionListener.ERROR_CODES.DELETE);
+            } finally {
+                try {
+                    iterator.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void onProgressUpdate(Void... params) {
+            mSQLListener.onSuccess();
+        }
     }
 
 
@@ -266,10 +330,10 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
                     mSQLListener.onSuccess();
                     break;
                 case SQL_FAIL:
-                    mSQLListener.onFail();
+                    mSQLListener.onFail(SQLInteractionListener.FAIL_CODES.ADD);
                     break;
                 case SQL_ERROR:
-                    mSQLListener.onError();
+                    mSQLListener.onError(SQLInteractionListener.ERROR_CODES.ADD);
                     break;
                 default:
                     break;

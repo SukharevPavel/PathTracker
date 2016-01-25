@@ -2,9 +2,12 @@
     <string name="app_name">PathTracker</string>
     <string name="title_activity_map">Map</string>
 
-    <string name="error_saving_to_db">Error saving to database, try again. Maybe, path with this name already exists?</string>
-    <string name="error_saving_list_is_empty">List of points is empty</string>
-    <string name="error_saving_fail">Failed save to database</string>
+    <string name="error_saving_to_db">Error when saving to database, try again. Maybe, path with this name already exists?</string>
+    <string name="error_updating_db">Error when updating database, try again. Maybe, path with this name already exists?</string>
+    <string name="error_deleting_from_db">Error when deleting from database</string>
+    <string name="fail_list_is_empty">List of points is empty</string>
+    <string name="fail_saving_add">Failed save to database</string>
+    <string name="fail_path_is_null">Fail - path is not exists</string>
     <string name="error_no_path_info">Error saving to database - no info about current path</string>
     <!--fragment_dialogs-->
     <string name="type_path_name">Type name of path</string>
