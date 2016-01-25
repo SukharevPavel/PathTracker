@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PathTracker</string>
+    <string name="app_name">Path Tracker</string>
     <string name="title_activity_map">Map</string>
 
     <string name="error_saving_to_db">Error when saving to database, try again. Maybe, path with this name already exists?</string>
@@ -129,6 +129,5 @@
         <item>180</item>
         <item>300</item>
     </string-array>
-    <string name="title_activity_search_path">SearchPathActivity</string>
 
 </resources>

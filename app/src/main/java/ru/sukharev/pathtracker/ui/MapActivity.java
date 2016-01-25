@@ -89,6 +89,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar.setTitle(getString(R.string.title_activity_map));
         setSupportActionBar(mToolbar);
 
         setUpFragments();
