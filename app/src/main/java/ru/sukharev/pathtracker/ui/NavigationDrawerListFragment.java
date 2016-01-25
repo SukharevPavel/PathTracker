@@ -31,9 +31,7 @@ import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -191,16 +189,11 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
     private void deleteSelected() {
         Map<MapPath, Boolean> map = mAdapter.getCheckedMap();
-        try {
-            for (MapPath path : map.keySet()) {
-                if (map.get(path)) {
-                    deletePathFromDatabase(path);
-                    mAdapter.remove(path);
-                }
+        for (MapPath path : map.keySet()) {
+            if (map.get(path)) {
+                deletePathFromDatabase(path);
+                mAdapter.remove(path);
             }
-        } catch (SQLException e) {
-            Toast.makeText(getContext(), getString(R.string.error_delete_path), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
         }
     }
 
@@ -231,14 +224,8 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.delete_item:
-                try {
-                    deletePathFromDatabase(mAdapter.getSelected());
-                    mAdapter.remove(mAdapter.getSelected());
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getContext(), getString(R.string.error_delete_path), Toast.LENGTH_LONG).show();
-                    return super.onContextItemSelected(item);
-                }
+                deletePathFromDatabase(mAdapter.getSelected());
+                mAdapter.remove(mAdapter.getSelected());
                 return true;
             case R.id.rename_item:
                 showPathRenamingFragment(mAdapter.getSelected().getName());
@@ -256,7 +243,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
         mPathRenamingFragment.show(getActivity().getSupportFragmentManager(), PATH_RENAMING_FRAGMENT_TAG);
     }
 
-    private void deletePathFromDatabase(MapPath path) throws SQLException {
+    private void deletePathFromDatabase(MapPath path) {
         mPathListener.onPathDelete(path);
     }
 

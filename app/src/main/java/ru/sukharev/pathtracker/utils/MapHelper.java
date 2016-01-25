@@ -100,7 +100,7 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
                 Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(mContext).
                         getString(mContext.getString(R.string.pref_key_measure_interval),
                                 mContext.getString(R.string.pref_key_measure_interval_def)))));
-        mLocationRequest.setFastestInterval(mLocationRequest.getInterval() / 2);
+        mLocationRequest.setFastestInterval(mLocationRequest.getInterval());
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 

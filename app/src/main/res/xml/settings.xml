@@ -46,11 +46,11 @@
             android:title="@string/pref_units_distance" />
         <ListPreference
             android:defaultValue="@string/pref_key_units_speed_default"
-            android:dialogTitle="@string/pref_units_speed_dialog"
+            android:dialogTitle="@string/pref_units_time_dialog"
             android:entries="@array/array_speed_units"
             android:entryValues="@array/array_speed_units"
             android:key="@string/pref_key_units_speed"
-            android:title="@string/pref_units_speed" />
+            android:title="@string/pref_units_time" />
 
     </PreferenceCategory>
 </PreferenceScreen>

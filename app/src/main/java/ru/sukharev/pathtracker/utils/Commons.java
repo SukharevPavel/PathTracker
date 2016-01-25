@@ -7,7 +7,6 @@ public class Commons {
 
     public final static char SPACE = ' ';
     public final static char SLASH = '/';
-    public final static char DOT = '.';
     public final static char COLON = ':';
     public final static long METRES_IN_KILOMETRE = 1000;
     public final static double METRES_IN_MILE = 1609.344;
