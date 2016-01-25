@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -113,7 +114,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
     @Override
     public void onStart() {
         super.onStart();
-        padMapElements(mMap);
+        if (mMap != null) padMapElements(mMap);
         Log.i(TAG, "activity start");
         if (mMap != null) setMapType();
         updateInfoFragmentIfExists();
@@ -161,6 +162,7 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
             fragment.show(getSupportFragmentManager(), ENABLE_GPS_FRAGMENT_TAG);
         }
     }
+
 
 
     private void setUpFragments() {
@@ -471,6 +473,17 @@ public class MapActivity extends AppCompatActivity implements MapHelper.MapHelpe
 
 
     }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            moveTaskToBack(true);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
 
     @Override
     public void onEndPoint(MapPoint endPoint) {

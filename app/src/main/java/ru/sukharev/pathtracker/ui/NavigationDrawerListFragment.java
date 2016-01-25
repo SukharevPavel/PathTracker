@@ -225,6 +225,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
     public void invalidateSelection() {
         mSelectedItem = null;
+        mAdapter.setSelected(null);
     }
 
 
@@ -386,7 +387,9 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         public void replaceList(List<MapPath> newList) {
             mObjects = newList;
-            mSavedObjects = new ArrayList<>(mObjects);
+            if (mObjects != null)
+                mSavedObjects = new ArrayList<>(mObjects);
+            else mSavedObjects = new ArrayList<>();
             mUnits = new Measurement(getContext());
             getListSettings(getContext());
             notifyDataSetChanged();
@@ -511,7 +514,7 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             if (selectedPath != null && mObjects.contains(selectedPath))
                 notifyItemChanged(mObjects.indexOf(selectedPath));
             selectedPath = path;
-            if (mObjects.contains(selectedPath))
+            if (selectedPath != null && mObjects.contains(selectedPath))
                 notifyItemChanged(mObjects.indexOf(selectedPath));
         }
 

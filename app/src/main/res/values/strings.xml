@@ -12,7 +12,7 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="path_name_hint">Path-</string>
 
-    <string name="dialog_enable_GPS">Use GPS for better performance?</string>
+    <string name="dialog_enable_GPS">You should enable GPS for path tracking</string>
     <string name="dialog_is_really_clear">Do you really want to clear current path?</string>
     <string name="dialog_error_get_permission">Can\'t get permission to access location</string>
     <string name="dialog_yes">Yes</string>
@@ -42,7 +42,7 @@
     <string name="info_cur_speed">Current speed:</string>
     <string name="info_dist">Distance:</string>
     <string name="info_time">Time:</string>
-    <string name="title_activity_preference">PreferenceActivity</string>
+    <string name="title_activity_preference">Preferences</string>
     <string name="action_settings">Settings</string>
     <string name="map_settings">Map settings</string>
     <string name="list_settings">List settings</string>
