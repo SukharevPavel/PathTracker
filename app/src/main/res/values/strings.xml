@@ -83,7 +83,7 @@
     <string name="unit_metre_suffix">m</string>
     <string name="unit_nautical_mile_suffix">nm</string>
     <string name="unit_hour_suffix">h</string>
-    <string name="unit_minute_suffix">m</string>
+    <string name="unit_minute_suffix">min</string>
     <string name="unit_second_suffix">s</string>
     <string name="menu_delete_selected">Delete selected</string>
     <string name="search_hint">Type path name</string>

@@ -83,7 +83,7 @@
     <string name="unit_metre_suffix">м</string>
     <string name="unit_nautical_mile_suffix">м. миль</string>
     <string name="unit_hour_suffix">ч</string>
-    <string name="unit_minute_suffix">м</string>
+    <string name="unit_minute_suffix">мин</string>
     <string name="unit_second_suffix">с</string>
     <string name="menu_delete_selected">Удалить выбранные</string>
     <string name="search_hint">Введите имя пути</string>

@@ -23,8 +23,8 @@ android {
             debuggable true
         }
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles 'proguard-android-pathtracker.txt', 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }
