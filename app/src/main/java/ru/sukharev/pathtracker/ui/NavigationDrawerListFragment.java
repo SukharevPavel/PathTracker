@@ -109,7 +109,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
         getLoaderManager().initLoader(PATH_LOADER_ID, null, this);
 
@@ -123,7 +122,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
 
         mDrawerToolbar = (Toolbar) v.findViewById(R.id.drawer_toolbar);
         setUpDrawerToolbar();
-        //setListAdapter(mAdapter);
         return v;
     }
 
@@ -210,7 +208,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setRetainInstance(true);
-        //reloadList();
         mPathListener = (NavigationDrawerListener) getActivity();
         selectItem(mSelectedItem);
 
@@ -319,10 +316,6 @@ public class NavigationDrawerListFragment extends Fragment implements LoaderMana
             }
         };
 
-        // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
-        // per the navigation drawer design guidelines.
-
-        // Defer code dependent on restoration of previous instance state.
         mDrawerLayout.post(new Runnable() {
             @Override
             public void run() {

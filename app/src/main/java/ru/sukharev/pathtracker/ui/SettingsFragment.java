@@ -2,7 +2,6 @@ package ru.sukharev.pathtracker.ui;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceManager;
@@ -19,10 +18,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     private static String[] mapTypes;
     private ListPreference mMapType;
     private ListPreference mMeasureInterval;
-    private CheckBoxPreference mStartTime;
-    private CheckBoxPreference mEndTime;
-    private CheckBoxPreference mDistance;
-    private CheckBoxPreference mAvgSpeed;
     private ListPreference mDistanceUnits;
     private ListPreference mSpeedUnits;
 

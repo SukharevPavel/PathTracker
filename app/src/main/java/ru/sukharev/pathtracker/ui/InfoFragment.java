@@ -12,7 +12,9 @@ import ru.sukharev.pathtracker.R;
 import ru.sukharev.pathtracker.utils.Measurement;
 import ru.sukharev.pathtracker.utils.TimerView;
 
-
+/**
+ * Info fragment (CardView) that uses for showing info about current path - speed, time, distance
+ */
 public class InfoFragment extends Fragment {
 
     public final static String TAG = "InfoFragment.java";
@@ -77,7 +79,6 @@ public class InfoFragment extends Fragment {
     private void initFields(){
         Bundle bundle = getArguments();
         if (bundle != null) {
-            Log.i(TAG, "init");
             totalTime = bundle.getLong(ARG_TOTAL_TIME);
             dist = bundle.getDouble(ARG_DISTANCE);
             curSpeed = bundle.getDouble(ARG_CUR_SPEED);
@@ -87,7 +88,6 @@ public class InfoFragment extends Fragment {
 
 
     private void setTextFields(){
-        //mTimeText.setText(String.valueOf(format.format(new Date(curTime - startTime))));
         mUnits = new Measurement(getContext());
         mTimeText.setNewTime(totalTime);
         mDistText.setText(mUnits.formatMeters(dist));

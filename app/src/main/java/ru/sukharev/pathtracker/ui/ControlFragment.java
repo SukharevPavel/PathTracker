@@ -70,7 +70,6 @@ public class ControlFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstancceState){
         super.onCreate(savedInstancceState);
-        Log.i(TAG, "fragment create");
         mHelper = new MapHelper(getActivity().getApplicationContext());
         setRetainInstance(true);
     }
@@ -78,7 +77,6 @@ public class ControlFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.i(TAG, "fragment create view start");
         View view = inflater.inflate(R.layout.fragment_control, container, false);
         mListener = (ControlFragmentListener) getActivity();
         mHelper.setListeners(getActivity());
@@ -100,7 +98,6 @@ public class ControlFragment extends Fragment {
 
         changeButtonIcon(mHelper.isServiceStarted());
         mHelper.getList();
-        Log.i(TAG, "fragment create view end");
         return view;
     }
 
