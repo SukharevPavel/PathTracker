@@ -3,8 +3,8 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-            keyAlias 'PathTrackerKey'
-            keyPassword 'Eezoh2cohh'
+            keyAlias 'PathTrackerRelease'
+            keyPassword '11111111'
             storeFile file('/home/hpc/android-sdk-linux-2/android-sdk-linux/release.jks')
             storePassword '393524'
         }
