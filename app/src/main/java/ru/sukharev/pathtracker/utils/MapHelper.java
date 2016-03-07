@@ -47,9 +47,14 @@ public class MapHelper implements GoogleApiClient.ConnectionCallbacks,
     private boolean isWaitingForStartPoint;
 
     private GoogleApiClient mGoogleApiClient;
+    private static MapHelper sHelper;
 
+    public static MapHelper getInstance(Context ctx){
+        if (sHelper == null) sHelper = new MapHelper(ctx);
+        return sHelper;
+    }
 
-    public MapHelper(@NonNull Context ctx) {
+    private MapHelper(@NonNull Context ctx) {
         mContext = ctx;
         mPoints = new CopyOnWriteArrayList<>();
         mDatabaseHelper = DatabaseHelper.getInstance(ctx);

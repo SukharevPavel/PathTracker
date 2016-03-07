@@ -40,4 +40,8 @@ dependencies {
     compile 'com.android.support:support-v4:23.1.1'
     compile 'com.j256.ormlite:ormlite-android:4.45'
     compile 'com.android.support:design:23.1.1'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.2'
+    testCompile "com.google.dexmaker:dexmaker:1.2"
+    testCompile "com.google.dexmaker:dexmaker-mockito:1.2"
 }

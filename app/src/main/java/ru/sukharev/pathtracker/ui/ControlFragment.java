@@ -70,7 +70,7 @@ public class ControlFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstancceState){
         super.onCreate(savedInstancceState);
-        mHelper = new MapHelper(getActivity().getApplicationContext());
+        mHelper = MapHelper.getInstance(getActivity().getApplicationContext());
         setRetainInstance(true);
     }
 
